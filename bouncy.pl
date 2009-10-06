@@ -65,6 +65,9 @@ my $dx = 0.2;
 my $dy = -1.25;
 my @xs = ($x);
 my @ys = ($y);
+
+SDL::ShowCursor(0);
+
 while (1) {
 
     # process event queue
@@ -152,3 +155,4 @@ while (1) {
     $app->sync;
 }
 
+SDL::ShowCursor(1);
