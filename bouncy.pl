@@ -1,12 +1,14 @@
 #!/usr/bin/env perl 
 use strict;
 use warnings;
+use lib 'lib';
 use SDL;
 use SDL::App;
 use SDL::Event;
 use SDL::Surface;
 use SDL::Color;
 use SDL::Rect;
+use Bouncy::Brick;
 
 my $screen_width  = 640;
 my $screen_height = 480;
@@ -32,6 +34,38 @@ my $ball_rect = SDL::Rect->new(
     -y      => 0,
     -width  => $ball->width,
     -height => $ball->height,
+);
+
+my $brick = SDL::Surface->new( -name => 'red.png' );
+$brick->display_format();
+my $brick_rect = SDL::Rect->new(
+    -x      => 0,
+    -y      => 0,
+    -width  => $brick->width,
+    -height => $brick->height,
+);
+Bouncy::Brick->surface($brick);
+Bouncy::Brick->rect($brick_rect);
+
+my @bricks = (
+    Bouncy::Brick->new( x => 0,   y => 100 ),
+    Bouncy::Brick->new( x => 64,  y => 100 ),
+    Bouncy::Brick->new( x => 128, y => 100 ),
+    Bouncy::Brick->new( x => 0,   y => 132 ),
+    Bouncy::Brick->new( x => 64,  y => 132 ),
+    Bouncy::Brick->new( x => 128, y => 132 ),
+    Bouncy::Brick->new( x => 0,   y => 164 ),
+    Bouncy::Brick->new( x => 0,   y => 196 ),
+    Bouncy::Brick->new( x => 0,   y => 228 ),
+    Bouncy::Brick->new( x => 0,   y => 260 ),
+    Bouncy::Brick->new( x => 0,   y => 292 ),
+    Bouncy::Brick->new( x => 0,   y => 324 ),
+    Bouncy::Brick->new( x => 576, y => 164 ),
+    Bouncy::Brick->new( x => 576, y => 196 ),
+    Bouncy::Brick->new( x => 576, y => 228 ),
+    Bouncy::Brick->new( x => 576, y => 260 ),
+    Bouncy::Brick->new( x => 576, y => 292 ),
+    Bouncy::Brick->new( x => 576, y => 324 ),
 );
 
 my $bat = SDL::Surface->new( -name => 'bat.png' );
@@ -113,6 +147,11 @@ while (1) {
     put_sprite( $x,     $y - $ball->height, $ball, $ball_rect );
     put_sprite( $bat_x, $bat_y,             $bat,  $bat_rect );
 
+    foreach my $brick (@bricks) {
+        put_sprite( $brick->x, $brick->y, $brick->surface, $brick->rect )
+            if $brick->visible;
+    }
+
     push @xs, $x;
     push @ys, $y;
 
@@ -150,6 +189,27 @@ while (1) {
         $dy = $dy * -1.1;
         $dx = $dx * 0.9;
         $y += $dy;
+    }
+
+    foreach my $brick (@bricks) {
+        next unless $brick->visible;
+        if (   $x > $brick->x - $ball->width
+            && $x < $brick->x + $brick->w
+            && $y > $brick->y
+            && $y < $brick->y + $brick->h + $ball->height )
+        {
+            if (   $ys[-1] > $brick->y
+                && $ys[-1] < $brick->y + $brick->h + $ball->height )
+            {
+                $dx = $dx * -0.9;
+                $x += $dx;
+            } else {
+                $dy = $dy * -0.9;
+                $y += $dy;
+            }
+            $brick->visible(0);
+            last;
+        }
     }
 
     $app->sync;
