@@ -14,7 +14,7 @@ my $screen_height = 480;
 my $app = SDL::App->new(
     -width  => 640,
     -height => 480,
-    -flags => SDL_ANYFORMAT | SDL_HWACCEL
+    -flags  => SDL_ANYFORMAT | SDL_HWACCEL
         | SDL_RLEACCEL,    # SDL_HWACCEL SDL_DOUBLEBUF SDL_ANYFORMAT
 );
 
@@ -63,6 +63,8 @@ my ( $x, $y ) = ( $bat_x + 54, $bat_y );
 
 my $dx = 0.2;
 my $dy = -1.25;
+my @xs = ($x);
+my @ys = ($y);
 while (1) {
 
     # process event queue
@@ -78,8 +80,8 @@ while (1) {
     if ( $etype eq SDL_MOUSEBUTTONDOWN ) {
         $x  = $bat_x + $bat->width / 3;
         $y  = $bat_y;
-        $dx = 1;
-        $dy = -1.3;
+        $dx = 0.2;
+        $dy = -1.25;
     }
     if ( $etype eq SDL_MOUSEMOTION ) {
         $bat_x = $event->motion_x - 56;
@@ -88,8 +90,33 @@ while (1) {
     }
 
     $app->fill( $app_rect, $background );
+
+    SDL::GFXAalineRGBA(
+        $$app, $x,
+        $y - $ball->height / 2,
+        $xs[0] + $ball->width / 2,
+        $ys[0] - $ball->height / 2,
+        0, 127, 127, 255
+    );
+    SDL::GFXAalineRGBA(
+        $$app,
+        $x + $ball->width,
+        $y - $ball->height / 2,
+        $xs[0] + $ball->width / 2,
+        $ys[0] - $ball->height / 2,
+        0, 127, 127, 255
+    );
+
     put_sprite( $x,     $y - $ball->height, $ball, $ball_rect );
     put_sprite( $bat_x, $bat_y,             $bat,  $bat_rect );
+
+    push @xs, $x;
+    push @ys, $y;
+
+    if ( @xs > 80 ) {
+        shift @xs;
+        shift @ys;
+    }
 
     $x += $dx;
     if ( $x + $ball->width > $screen_width ) {
@@ -109,7 +136,7 @@ while (1) {
         && $y > $screen_height - $bat->height + 5 )
     {
         $dy = -1.25;
-        $dx = 0.5 * $dx + ( $x + $ball->width / 2 - $bat_x - 56 ) / 100;
+        $dx = 0.3 * $dx + ( $x + $ball->width / 2 - $bat_x - 56 ) / 100;
         $y += $dy;
     } elsif ( $y > $screen_height ) {
         $dy = $dy * -0.7;
@@ -121,6 +148,7 @@ while (1) {
         $dx = $dx * 0.9;
         $y += $dy;
     }
+
     $app->sync;
 }
 
