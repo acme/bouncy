@@ -20,12 +20,14 @@ my $app = SDL::App->new(
         | SDL_RLEACCEL,    # SDL_HWACCEL SDL_DOUBLEBUF SDL_ANYFORMAT
 );
 
+# $app->fullscreen(1);
+
 my $app_rect = SDL::Rect->new(
     -height => $screen_height,
     -width  => $screen_width,
 );
 
-my $background = $SDL::Color::yellow;
+my $background_colour = $SDL::Color::yellow;
 
 my $ball = SDL::Surface->new( -name => 'ball2.png' );
 $ball->display_format();
@@ -80,7 +82,7 @@ my $bat_rect = SDL::Rect->new(
 my $event = SDL::Event->new();
 
 sub put_sprite {
-    my ( $x, $y, $source, $source_rect ) = @_;
+    my ( $surface, $x, $y, $source, $source_rect ) = @_;
 
     my $dest_rect = SDL::Rect->new(
         -x      => $x,
@@ -88,7 +90,8 @@ sub put_sprite {
         -width  => $source->width,
         -height => $source->height,
     );
-    $source->blit( $source_rect, $app, $dest_rect );
+    $source->blit( $source_rect, $surface, $dest_rect );
+    return $dest_rect;
 }
 
 my $bat_x = 100;
@@ -100,9 +103,27 @@ my $dy = -1.25;
 my @xs = ($x);
 my @ys = ($y);
 
+my $background = SDL::Surface->new(
+    -flags  => SDL_SWSURFACE,
+    -width  => $screen_width,
+    -height => $screen_height
+);
+$background->display_format();
+$background->fill( $app_rect, $background_colour );
+foreach my $brick (@bricks) {
+    put_sprite( $background, $brick->x, $brick->y, $brick->surface,
+        $brick->rect );
+}
+$background->update($app_rect);
+
+$background->blit( $app_rect, $app, $app_rect );
+$app->update($app_rect);
+$app->sync;
+
 SDL::ShowCursor(0);
 
 while (1) {
+    my @updates;
 
     # process event queue
     $event->pump;
@@ -121,12 +142,19 @@ while (1) {
         $dy = -1.25;
     }
     if ( $etype eq SDL_MOUSEMOTION ) {
+        my $bat_background_rect = SDL::Rect->new(
+            -x      => $bat_x,
+            -y      => $bat_y,
+            -width  => $bat->width,
+            -height => $bat->height,
+        );
+        $background->blit( $bat_background_rect, $app, $bat_background_rect );
+        push @updates, $bat_background_rect;
+
         $bat_x = $event->motion_x - 56;
         $bat_x = 0 if $bat_x < 0;
         $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
     }
-
-    $app->fill( $app_rect, $background );
 
     SDL::GFXAalineRGBA(
         $$app, $x,
@@ -144,13 +172,18 @@ while (1) {
         0, 127, 127, 255
     );
 
-    put_sprite( $x,     $y - $ball->height, $ball, $ball_rect );
-    put_sprite( $bat_x, $bat_y,             $bat,  $bat_rect );
+    my $ball_background_rect = SDL::Rect->new(
+        -x      => $xs[-1],
+        -y      => $ys[-1] - $ball->height,
+        -width  => $ball->width,
+        -height => $ball->height,
+    );
+    $background->blit( $ball_background_rect, $app, $ball_background_rect );
+    push @updates, $ball_background_rect;
 
-    foreach my $brick (@bricks) {
-        put_sprite( $brick->x, $brick->y, $brick->surface, $brick->rect )
-            if $brick->visible;
-    }
+    push @updates,
+        put_sprite( $app, $x, $y - $ball->height, $ball, $ball_rect );
+    push @updates, put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 
     push @xs, $x;
     push @ys, $y;
@@ -207,12 +240,21 @@ while (1) {
                 $dy = $dy * -0.9;
                 $y += $dy;
             }
+            my $brick_background_rect = SDL::Rect->new(
+                -x      => $brick->x,
+                -y      => $brick->y,
+                -width  => $brick->w,
+                -height => $brick->h,
+            );
+            $background->fill( $brick_background_rect, $background_colour );
+            $app->fill( $brick_background_rect, $background_colour );
+            push @updates, $brick_background_rect;
             $brick->visible(0);
             last;
         }
     }
 
-    $app->sync;
+    $app->update(@updates);
 }
 
 SDL::ShowCursor(1);
