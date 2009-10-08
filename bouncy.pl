@@ -9,9 +9,13 @@ use SDL::Surface;
 use SDL::Color;
 use SDL::Rect;
 use Bouncy::Brick;
+use Time::HiRes qw(time sleep);
 
 my $screen_width  = 640;
 my $screen_height = 480;
+
+my $max_fps                    = 50;
+my $min_seconds_between_frames = 1 / $max_fps;
 
 my $app = SDL::App->new(
     -width  => 640,
@@ -126,38 +130,73 @@ $app->sync;
 
 SDL::ShowCursor(0);
 
+my $this_frame_time = time;
+my $last_frame_time = $this_frame_time;
+
+my $last_measured_fps_time   = time;
+my $last_measured_fps_frames = 0;
+my $frames                   = 0;
+
 while (1) {
+    my $now = time;
+
+    $last_frame_time = $this_frame_time;
+    $this_frame_time = $now;
+    my $last_frame_seconds = $this_frame_time - $last_frame_time;
+
+    if ( $now - $last_measured_fps_time > 1 ) {
+        my $fps = ( $frames - $last_measured_fps_frames )
+            / ( $now - $last_measured_fps_time );
+        warn "$fps FPS";
+        $last_measured_fps_frames = $frames;
+        $last_measured_fps_time   = $now;
+    }
+
+    if ( $last_frame_seconds < $min_seconds_between_frames ) {
+        my $seconds_to_sleep
+            = $min_seconds_between_frames - $last_frame_seconds;
+
+        my $actually_slept = sleep($seconds_to_sleep);
+        $this_frame_time = time + $seconds_to_sleep - $actually_slept;
+    }
+
+    $frames++;
+
     my @updates;
 
     # process event queue
     $event->pump;
-    $event->poll;
-    my $etype = $event->type;
 
     # handle user events
-    last if ( $etype eq SDL_QUIT );
-    last if ( SDL::GetKeyState(SDLK_ESCAPE) );
-    last if ( $etype eq SDL_KEYDOWN );
+    my $event = SDL::Event->new;
+    while ( $event->poll() ) {
+        my $etype = $event->type;
 
-    if ( $etype eq SDL_MOUSEBUTTONDOWN ) {
-        $x  = $bat_x + $bat->width / 3;
-        $y  = $bat_y;
-        $dx = 0.2;
-        $dy = -1.25;
-    }
-    if ( $etype eq SDL_MOUSEMOTION ) {
-        my $bat_background_rect = SDL::Rect->new(
-            -x      => $bat_x,
-            -y      => $bat_y,
-            -width  => $bat->width,
-            -height => $bat->height,
-        );
-        $background->blit( $bat_background_rect, $app, $bat_background_rect );
-        push @updates, $bat_background_rect;
+        exit if ( $etype eq SDL_QUIT );
+        exit if ( SDL::GetKeyState(SDLK_ESCAPE) );
+        exit if ( $etype eq SDL_KEYDOWN );
 
-        $bat_x = $event->motion_x - 56;
-        $bat_x = 0 if $bat_x < 0;
-        $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
+        if ( $etype eq SDL_MOUSEBUTTONDOWN ) {
+            $x  = $bat_x + $bat->width / 3;
+            $y  = $bat_y;
+            $dx = 0.2;
+            $dy = -1.25;
+        }
+        if ( $etype eq SDL_MOUSEMOTION ) {
+            my $bat_background_rect = SDL::Rect->new(
+                -x      => $bat_x,
+                -y      => $bat_y,
+                -width  => $bat->width,
+                -height => $bat->height,
+            );
+            $background->blit( $bat_background_rect, $app,
+                $bat_background_rect );
+            push @updates, $bat_background_rect;
+
+            $bat_x = $event->motion_x - 56;
+            $bat_x = 0 if $bat_x < 0;
+            $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
+        }
     }
 
     SDL::GFXAalineRGBA(
