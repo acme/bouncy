@@ -20,11 +20,9 @@ my $min_seconds_between_frames = 1 / $max_fps;
 my $app = SDL::App->new(
     -width  => 640,
     -height => 480,
-    -flags  => SDL_ANYFORMAT | SDL_HWACCEL
-        | SDL_RLEACCEL,    # SDL_HWACCEL SDL_DOUBLEBUF SDL_ANYFORMAT
-);
 
-# $app->fullscreen(1);
+    #     -flags  => SDL_FULLSCREEN,
+);
 
 my $app_rect = SDL::Rect->new(
     -height => $screen_height,
@@ -147,7 +145,7 @@ while (1) {
     if ( $now - $last_measured_fps_time > 1 ) {
         my $fps = ( $frames - $last_measured_fps_frames )
             / ( $now - $last_measured_fps_time );
-        printf("%0.2f FPS\n", $fps);
+        printf( "%0.2f FPS\n", $fps );
         $last_measured_fps_frames = $frames;
         $last_measured_fps_time   = $now;
     }
