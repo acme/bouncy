@@ -148,7 +148,8 @@ while (1) {
     if ( $now - $last_measured_fps_time > 1 ) {
         my $fps = ( $frames - $last_measured_fps_frames )
             / ( $now - $last_measured_fps_time );
-        printf( "%0.2f FPS\n", $fps );
+
+        # printf( "%0.2f FPS\n", $fps );
         $last_measured_fps_frames = $frames;
         $last_measured_fps_time   = $now;
     }
