@@ -4,10 +4,11 @@ use warnings;
 use lib 'lib';
 use SDL;
 use SDL::App;
-use SDL::Event;
-use SDL::Surface;
 use SDL::Color;
+use SDL::Event;
+use SDL::Mixer;
 use SDL::Rect;
+use SDL::Surface;
 use Bouncy::Brick;
 use Time::HiRes qw(time sleep);
 
@@ -23,6 +24,11 @@ my $app = SDL::App->new(
 
     #     -flags  => SDL_FULLSCREEN,
 );
+
+my $mixer     = SDL::Mixer->new( -frequency => 44100, -size => 4096 );
+my $ping      = SDL::Sound->new('ping.wav');
+my $explosion = SDL::Sound->new('explosion.wav');
+my $bounce    = SDL::Sound->new('bounce.wav');
 
 my $app_rect = SDL::Rect->new(
     -height => $screen_height,
@@ -255,11 +261,13 @@ while (1) {
         $ball_xv = $ball_xv * -0.9;
         $ball_yv = $ball_yv * 0.9;
         $x -= $dx;
+        play_ping();
     }
     if ( $x < 0 ) {
         $ball_xv = $ball_xv * -0.9;
         $ball_yv = $ball_yv * 0.9;
         $x -= $dx;
+        play_ping();
     }
 
     $ball_yv += $gravity * ( $last_frame_seconds + $last_frame_sleep );
@@ -273,15 +281,18 @@ while (1) {
         $ball_xv
             = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 4;
         $y -= $dy;
+        play_bounce();
     } elsif ( $y > $screen_height ) {
         $ball_yv = $ball_yv * -0.7;
         $ball_xv = $ball_xv * 0.7;
         $y -= $dy;
+        play_ping() if $dy > 0.2;
     }
     if ( $y - $ball->height < 0 ) {
         $ball_yv = $ball_yv * -1.1;
         $ball_xv = $ball_xv * 0.9;
         $y -= $dy;
+        play_ping();
     }
 
     foreach my $brick (@bricks) {
@@ -310,11 +321,25 @@ while (1) {
             $app->fill( $brick_background_rect, $background_colour );
             push @updates, $brick_background_rect;
             $brick->visible(0);
+            play_explosion();
+
             last;
         }
     }
 
     $app->update(@updates);
+}
+
+sub play_ping {
+    $mixer->play_channel( -1, $ping, 0 );
+}
+
+sub play_explosion {
+    $mixer->play_channel( -1, $explosion, 0 );
+}
+
+sub play_bounce {
+    $mixer->play_channel( -1, $bounce, 0 );
 }
 
 SDL::ShowCursor(1);
