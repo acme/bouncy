@@ -104,11 +104,11 @@ my $bat_x = 100;
 my $bat_y = $screen_height - $bat->height;
 my ( $x, $y ) = ( $bat_x + 54, $bat_y );
 
-my $ball_xv = 300; # pixels per second
-my $ball_yv = -500; # pixels per second
-my $gravity = 2; # pixels per second per second
-my @xs = ($x);
-my @ys = ($y);
+my $ball_xv = 300;      # pixels per second
+my $ball_yv = -1000;    # pixels per second
+my $gravity = 1250;     # pixels per second per second
+my @xs      = ($x);
+my @ys      = ($y);
 
 my $background = SDL::Surface->new(
     -flags  => SDL_SWSURFACE,
@@ -129,8 +129,8 @@ $app->sync;
 
 SDL::ShowCursor(0);
 
-my $this_frame_time = time;
-my $last_frame_time = $this_frame_time;
+my $this_frame_time  = time;
+my $last_frame_time  = $this_frame_time;
 my $last_frame_sleep = 0;
 
 my $last_measured_fps_time   = time;
@@ -139,7 +139,8 @@ my $frames                   = 0;
 
 while (1) {
     my $now = time;
-#warn "frame";
+
+    #warn "frame";
     $last_frame_time = $this_frame_time;
     $this_frame_time = $now;
     my $last_frame_seconds = $this_frame_time - $last_frame_time;
@@ -152,18 +153,20 @@ while (1) {
         $last_measured_fps_time   = $now;
     }
 
-#warn $last_frame_seconds, ' <?' , $min_seconds_between_frames;
-    if ( $last_frame_seconds  < $min_seconds_between_frames ) {
-    #warn "sleep";
+    #warn $last_frame_seconds, ' <?' , $min_seconds_between_frames;
+    if ( $last_frame_seconds < $min_seconds_between_frames ) {
+
+        #warn "sleep";
         my $seconds_to_sleep
             = $min_seconds_between_frames - $last_frame_seconds;
         my $actually_slept = sleep($seconds_to_sleep);
         $last_frame_sleep = $actually_slept;
+
         #warn "  slept for $seconds_to_sleep = $last_frame_sleep";
         $this_frame_time = time + $seconds_to_sleep - $actually_slept;
     } else {
-    $last_frame_sleep = 0;
-    } 
+        $last_frame_sleep = 0;
+    }
 
     $frames++;
 
@@ -182,10 +185,10 @@ while (1) {
         exit if ( $etype eq SDL_KEYDOWN );
 
         if ( $etype eq SDL_MOUSEBUTTONDOWN ) {
-            $x  = $bat_x + $bat->width / 3;
-            $y  = $bat_y;
-            $ball_xv = 20;
-            $ball_yv = -10;
+            $x       = $bat_x + $bat->width / 3;
+            $y       = $bat_y;
+            $ball_xv = 300;
+            $ball_yv = -1000;
         }
         if ( $etype eq SDL_MOUSEMOTION ) {
             my $bat_background_rect = SDL::Rect->new(
@@ -204,22 +207,24 @@ while (1) {
         }
     }
 
- 
-    SDL::GFXAalineRGBA(
-        $$app, $x,
-        $y - $ball->height / 2,
-        $xs[0] + $ball->width / 2,
-        $ys[0] - $ball->height / 2,
-        0, 127, 127, 255
-    );
-    SDL::GFXAalineRGBA(
-        $$app,
-        $x + $ball->width,
-        $y - $ball->height / 2,
-        $xs[0] + $ball->width / 2,
-        $ys[0] - $ball->height / 2,
-        0, 127, 127, 255
-    );
+    # draw tail
+    if (0) {
+        SDL::GFXAalineRGBA(
+            $$app, $x,
+            $y - $ball->height / 2,
+            $xs[0] + $ball->width / 2,
+            $ys[0] - $ball->height / 2,
+            0, 127, 127, 255
+        );
+        SDL::GFXAalineRGBA(
+            $$app,
+            $x + $ball->width,
+            $y - $ball->height / 2,
+            $xs[0] + $ball->width / 2,
+            $ys[0] - $ball->height / 2,
+            0, 127, 127, 255
+        );
+    }
 
     my $ball_background_rect = SDL::Rect->new(
         -x      => $xs[-1],
@@ -242,8 +247,7 @@ while (1) {
         shift @ys;
     }
 
-   my $dx = $ball_xv * ($last_frame_seconds + $last_frame_sleep);
-    # warn $last_frame_seconds + $last_frame_sleep;
+    my $dx = $ball_xv * ( $last_frame_seconds + $last_frame_sleep );
 
     $x += $dx;
     if ( $x + $ball->width > $screen_width ) {
@@ -257,14 +261,16 @@ while (1) {
         $x -= $dx;
     }
 
-   my $dy = $ball_yv * ($last_frame_seconds + $last_frame_sleep);
-    $y  += $dy;
-    #$dy += 0.002;
+    $ball_yv += $gravity * ( $last_frame_seconds + $last_frame_sleep );
+    my $dy = $ball_yv * ( $last_frame_seconds + $last_frame_sleep );
+    $y += $dy;
+
     if ( ( $x + $ball->width / 2 > $bat_x && $x < $bat_x + 108 )
         && $y > $screen_height - $bat->height + 5 )
     {
-        $ball_yv = -10;
-        $ball_xv = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 2;
+        $ball_yv = -1000;
+        $ball_xv
+            = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 4;
         $y -= $dy;
     } elsif ( $y > $screen_height ) {
         $ball_yv = $ball_yv * -0.7;
