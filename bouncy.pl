@@ -14,7 +14,7 @@ use Time::HiRes qw(time sleep);
 my $screen_width  = 640;
 my $screen_height = 480;
 
-my $max_fps                    = 50;
+my $max_fps                    = 300;
 my $min_seconds_between_frames = 1 / $max_fps;
 
 my $app = SDL::App->new(
