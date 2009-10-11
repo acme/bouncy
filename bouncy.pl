@@ -84,19 +84,40 @@ $map =~ s/^\n//;
 foreach my $line ( split "\n", $map ) {
     foreach my $character ( split //, $line ) {
         if ( $character eq 'R' ) {
-            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_red );
-        }
-               elsif ( $character eq 'B' ) {
-            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_blue );
-        }
-               elsif ( $character eq 'P' ) {
-            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_purple );
-        }
-               elsif ( $character eq 'Y' ) {
-            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_yellow );
-        }
-               elsif ( $character eq 'G' ) {
-            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_green );
+            push @bricks,
+                Bouncy::Brick->new(
+                x       => $brick_x,
+                y       => $brick_y,
+                surface => $brick_red
+                );
+        } elsif ( $character eq 'B' ) {
+            push @bricks,
+                Bouncy::Brick->new(
+                x       => $brick_x,
+                y       => $brick_y,
+                surface => $brick_blue
+                );
+        } elsif ( $character eq 'P' ) {
+            push @bricks,
+                Bouncy::Brick->new(
+                x       => $brick_x,
+                y       => $brick_y,
+                surface => $brick_purple
+                );
+        } elsif ( $character eq 'Y' ) {
+            push @bricks,
+                Bouncy::Brick->new(
+                x       => $brick_x,
+                y       => $brick_y,
+                surface => $brick_yellow
+                );
+        } elsif ( $character eq 'G' ) {
+            push @bricks,
+                Bouncy::Brick->new(
+                x       => $brick_x,
+                y       => $brick_y,
+                surface => $brick_green
+                );
         }
         $brick_x += 64;
     }
@@ -294,14 +315,14 @@ while (1) {
 
     $x += $dx;
     if ( $x + $ball->width > $screen_width ) {
-        $ball_xv = $ball_xv * -0.9;
-        $ball_yv = $ball_yv * 0.9;
+        $ball_xv = $ball_xv * -1;
+        $ball_yv = $ball_yv * 1;
         $x -= $dx;
         play_ping();
     }
     if ( $x < 0 ) {
-        $ball_xv = $ball_xv * -0.9;
-        $ball_yv = $ball_yv * 0.9;
+        $ball_xv = $ball_xv * -1;
+        $ball_yv = $ball_yv * 1;
         $x -= $dx;
         play_ping();
     }
@@ -325,8 +346,8 @@ while (1) {
         play_ping() if $dy > 0.2;
     }
     if ( $y - $ball->height < 0 ) {
-        $ball_yv = $ball_yv * -1.1;
-        $ball_xv = $ball_xv * 0.9;
+        $ball_yv = $ball_yv * -1;
+        $ball_xv = $ball_xv * 1;
         $y -= $dy;
         play_ping();
     }
@@ -341,10 +362,10 @@ while (1) {
             if (   $ys[-1] > $brick->y
                 && $ys[-1] < $brick->y + $brick->h + $ball->height )
             {
-                $ball_xv = $ball_xv * -0.9;
+                $ball_xv = $ball_xv * -1;
                 $x -= $dx;
             } else {
-                $ball_yv = $ball_yv * -0.9;
+                $ball_yv = $ball_yv * -1;
                 $y -= $dy;
             }
             my $brick_background_rect
