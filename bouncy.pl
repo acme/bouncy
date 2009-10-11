@@ -26,7 +26,7 @@ my $app = SDL::App->new(
     #     -flags  => SDL_FULLSCREEN,
 );
 
-my $mixer = SDL::Mixer->new( -frequency => 44100, -size => 4096 );
+my $mixer = SDL::Mixer->new( -frequency => 44100, -size => 1024 );
 my $ping = SDL::Sound->new('ping.ogg');
 $ping->volume(64);
 my $explosion = SDL::Sound->new('explosion.ogg');
