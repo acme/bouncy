@@ -148,6 +148,7 @@ foreach my $brick (@bricks) {
 }
 
 $foreground->blit( $app_rect, $app, $app_rect );
+put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 $app->update($app_rect);
 
 SDL::ShowCursor(0);
