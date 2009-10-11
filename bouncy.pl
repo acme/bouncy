@@ -9,7 +9,7 @@ use SDL::Event;
 use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
-use SDL::Tool::Font;
+use SDL::TTFont;
 use Bouncy::Brick;
 use Time::HiRes qw(time sleep);
 
@@ -38,12 +38,12 @@ my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
 my $background_colour = $SDL::Color::yellow;
 
-my $font = SDL::Tool::Font->new(
+my $font = SDL::TTFont->new(
     -normal => 1,
-    -ttfont => 'DroidSansMono.ttf',
+    -name   => 'DroidSansMono.ttf',
     -size   => 20,
     -fg     => $SDL::Color::black,
-    -bg     => $background_colour,
+    -bg     => SDL::Color->new( -r => 200, -g => 200, -b => 200 ),
 );
 my $score = 0;
 
@@ -128,6 +128,11 @@ while ( $tile_x < $screen_width ) {
     $tile_y = 0;
     $tile_x += $background_tile->width;
 }
+
+$background->fill(
+    SDL::Rect->new( 0, 0, $screen_width, 24 ),
+    SDL::Color->new( -r => 200, -g => 200, -b => 200 )
+);
 
 my $foreground = SDL::Surface->new(
     -flags  => SDL_SWSURFACE,
@@ -246,9 +251,11 @@ while (1) {
     }
 
     # draw score
-    my $score_rect = SDL::Rect->new( 0, 0, $screen_width, 20 );
+    my $text        = "Score: $score";
+    my $score_width = $font->width($text);
+    my $score_rect  = SDL::Rect->new( 0, 0, $score_width, 20 );
     $foreground->blit( $score_rect, $app, $score_rect );
-    $font->print( $app, 0, 0, "Score: $score" );
+    $font->print( $app, 0, 0, $text );
     push @updates, $score_rect;
 
     # draw the ball
