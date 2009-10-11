@@ -27,10 +27,12 @@ my $app = SDL::App->new(
 );
 
 my $mixer = SDL::Mixer->new( -frequency => 44100, -size => 4096 );
-my $ping = SDL::Sound->new('ping.wav');
+my $ping = SDL::Sound->new('ping.ogg');
 $ping->volume(64);
-my $explosion = SDL::Sound->new('explosion.wav');
-my $bounce    = SDL::Sound->new('bounce.wav');
+my $explosion = SDL::Sound->new('explosion.ogg');
+my $bounce    = SDL::Sound->new('bounce.ogg');
+my $music     = SDL::Music->new('Hydrate-Kenny_Beltrey.ogg');
+$mixer->play_music( $music, -1 );
 
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
