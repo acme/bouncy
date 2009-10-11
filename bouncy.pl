@@ -88,7 +88,7 @@ my @bricks = (
 );
 
 my $bat = SDL::Surface->new( -name => 'bat.png' );
-$bat->display_format();
+$bat->display_format_alpha();
 my $bat_rect = SDL::Rect->new( 0, 0, $bat->width, $bat->height );
 
 my $event = SDL::Event->new();
@@ -221,6 +221,8 @@ while (1) {
             $bat_x = $event->motion_x - 56;
             $bat_x = 0 if $bat_x < 0;
             $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
+            push @updates,
+                put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
         }
     }
 
@@ -258,7 +260,6 @@ while (1) {
 
     push @updates,
         put_sprite( $app, $x, $y - $ball->height, $ball, $ball_rect );
-    push @updates, put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 
     push @xs, $x;
     push @ys, $y;
