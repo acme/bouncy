@@ -3,9 +3,10 @@ use Moose;
 use MooseX::ClassAttribute;
 use MooseX::StrictConstructor;
 
-has 'x'       => ( is => 'ro', isa => 'Int',  required => 1 );
-has 'y'       => ( is => 'ro', isa => 'Int',  required => 1 );
-has 'visible' => ( is => 'rw', isa => 'Bool', required => 1, default => 1 );
+has 'x'        => ( is => 'ro', isa => 'Int',  required => 1 );
+has 'y'        => ( is => 'ro', isa => 'Int',  required => 1 );
+has 'visible'  => ( is => 'rw', isa => 'Bool', required => 1, default => 1 );
+has 'strength' => ( is => 'rw', isa => 'Int',  required => 1, default => 1 );
 has 'surface' => (
     is       => 'ro',
     isa      => 'SDL::Surface',

@@ -86,37 +86,38 @@ foreach my $line ( split "\n", $map ) {
         if ( $character eq 'R' ) {
             push @bricks,
                 Bouncy::Brick->new(
-                x       => $brick_x,
-                y       => $brick_y,
-                surface => $brick_red
+                x        => $brick_x,
+                y        => $brick_y,
+                surface  => $brick_red,
+                strength => 2,
                 );
         } elsif ( $character eq 'B' ) {
             push @bricks,
                 Bouncy::Brick->new(
                 x       => $brick_x,
                 y       => $brick_y,
-                surface => $brick_blue
+                surface => $brick_blue,
                 );
         } elsif ( $character eq 'P' ) {
             push @bricks,
                 Bouncy::Brick->new(
                 x       => $brick_x,
                 y       => $brick_y,
-                surface => $brick_purple
+                surface => $brick_purple,
                 );
         } elsif ( $character eq 'Y' ) {
             push @bricks,
                 Bouncy::Brick->new(
                 x       => $brick_x,
                 y       => $brick_y,
-                surface => $brick_yellow
+                surface => $brick_yellow,
                 );
         } elsif ( $character eq 'G' ) {
             push @bricks,
                 Bouncy::Brick->new(
                 x       => $brick_x,
                 y       => $brick_y,
-                surface => $brick_green
+                surface => $brick_green,
                 );
         }
         $brick_x += 64;
@@ -368,16 +369,20 @@ while (1) {
                 $ball_yv = $ball_yv * -1;
                 $y -= $dy;
             }
-            my $brick_background_rect
-                = SDL::Rect->new( $brick->x, $brick->y, $brick->w,
-                $brick->h );
-            $background->blit( $app_rect, $foreground, $app_rect );
-            $foreground->blit( $app_rect, $app,        $app_rect );
-            push @updates, $brick_background_rect;
-            $brick->visible(0);
-            play_explosion();
+            $brick->strength( $brick->strength - 1 );
+            if ( $brick->strength == 0 ) {
+                my $brick_background_rect
+                    = SDL::Rect->new( $brick->x, $brick->y, $brick->w,
+                    $brick->h );
+                $background->blit( $app_rect, $foreground, $app_rect );
+                $foreground->blit( $app_rect, $app,        $app_rect );
+                push @updates, $brick_background_rect;
+                $brick->visible(0);
+                $score++;
+                play_explosion();
+            }
+
             play_ping();
-            $score++;
             last;
         }
     }
