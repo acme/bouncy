@@ -13,15 +13,15 @@ use SDL::TTFont;
 use Bouncy::Brick;
 use Time::HiRes qw(time sleep);
 
-my $screen_width  = 640;
-my $screen_height = 480;
+my $screen_width  = 960;
+my $screen_height = 600;
 
 my $max_fps                    = 300;
 my $min_seconds_between_frames = 1 / $max_fps;
 
 my $app = SDL::App->new(
-    -width  => 640,
-    -height => 480,
+    -width  => $screen_width,
+    -height => $screen_height,
 
     #     -flags  => SDL_FULLSCREEN,
 );
@@ -56,50 +56,62 @@ my $ball = SDL::Surface->new( -name => 'ball2.png' );
 $ball->display_format();
 my $ball_rect = SDL::Rect->new( 0, 0, $ball->width, $ball->height );
 
-my $brick = SDL::Surface->new( -name => 'red.png' );
-$brick->display_format();
-my $brick_rect = SDL::Rect->new( 0, 0, $brick->width, $brick->height );
-Bouncy::Brick->surface($brick);
+my $brick_rect = SDL::Rect->new( 0, 0, 64, 32 );
 Bouncy::Brick->rect($brick_rect);
+my $brick_red = SDL::Surface->new( -name => 'brick_red.png' );
+$brick_red->display_format();
+my $brick_blue = SDL::Surface->new( -name => 'brick_blue.png' );
+$brick_blue->display_format();
+my $brick_purple = SDL::Surface->new( -name => 'brick_purple.png' );
+$brick_purple->display_format();
+my $brick_yellow = SDL::Surface->new( -name => 'brick_yellow.png' );
+$brick_yellow->display_format();
+my $brick_green = SDL::Surface->new( -name => 'brick_green.png' );
+$brick_green->display_format();
 
-my @bricks = (
-    Bouncy::Brick->new( x => 0,   y => 100 ),
-    Bouncy::Brick->new( x => 64,  y => 100 ),
-    Bouncy::Brick->new( x => 128, y => 100 ),
-    Bouncy::Brick->new( x => 192, y => 100 ),
-    Bouncy::Brick->new( x => 256, y => 100 ),
-    Bouncy::Brick->new( x => 0,   y => 132 ),
-    Bouncy::Brick->new( x => 64,  y => 132 ),
-    Bouncy::Brick->new( x => 128, y => 132 ),
-    Bouncy::Brick->new( x => 192, y => 132 ),
-    Bouncy::Brick->new( x => 256, y => 132 ),
-    Bouncy::Brick->new( x => 0,   y => 164 ),
-    Bouncy::Brick->new( x => 0,   y => 196 ),
-    Bouncy::Brick->new( x => 0,   y => 228 ),
-    Bouncy::Brick->new( x => 0,   y => 260 ),
-    Bouncy::Brick->new( x => 0,   y => 292 ),
-    Bouncy::Brick->new( x => 0,   y => 324 ),
-    Bouncy::Brick->new( x => 576, y => 164 ),
-    Bouncy::Brick->new( x => 576, y => 196 ),
-    Bouncy::Brick->new( x => 576, y => 228 ),
-    Bouncy::Brick->new( x => 576, y => 260 ),
-    Bouncy::Brick->new( x => 576, y => 292 ),
-    Bouncy::Brick->new( x => 576, y => 324 ),
-);
+my @bricks;
+my $map = "
+
+
+    RRRRRRR
+  PBBBBBBBBBP
+ PPPBBBBBBBPPP
+PPRPPGGGGGPPRPP
+BPPPYYYYYYYPPPB
+BBPYYYYYYYYYPBB";
+my ( $brick_x, $brick_y ) = ( 0, 24 );
+$map =~ s/^\n//;
+foreach my $line ( split "\n", $map ) {
+    foreach my $character ( split //, $line ) {
+        if ( $character eq 'R' ) {
+            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_red );
+        }
+               elsif ( $character eq 'B' ) {
+            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_blue );
+        }
+               elsif ( $character eq 'P' ) {
+            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_purple );
+        }
+               elsif ( $character eq 'Y' ) {
+            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_yellow );
+        }
+               elsif ( $character eq 'G' ) {
+            push @bricks, Bouncy::Brick->new( x => $brick_x, y => $brick_y, surface => $brick_green );
+        }
+        $brick_x += 64;
+    }
+    print "\n";
+    $brick_x = 0;
+    $brick_y += 32;
+}
 
 my $bat = SDL::Surface->new( -name => 'bat.png' );
+
 $bat->display_format_alpha();
+
 my $bat_rect = SDL::Rect->new( 0, 0, $bat->width, $bat->height );
 
 my $event = SDL::Event->new();
-
-sub put_sprite {
-    my ( $surface, $x, $y, $source, $source_rect ) = @_;
-
-    my $dest_rect = SDL::Rect->new( $x, $y, $source->width, $source->height );
-    $source->blit( $source_rect, $surface, $dest_rect );
-    return $dest_rect;
-}
 
 my $bat_x = $screen_width / 2;
 my $bat_y = $screen_height - $bat->height;
@@ -107,7 +119,7 @@ $app->warp( $bat_x, $bat_y );
 my ( $x, $y ) = ( $bat_x + 54, $bat_y );
 
 my $ball_xv = 300;      # pixels per second
-my $ball_yv = -1000;    # pixels per second
+my $ball_yv = -1120;    # pixels per second
 my $gravity = 1250;     # pixels per second per second
 my @xs      = ($x);
 my @ys      = ($y);
@@ -301,9 +313,9 @@ while (1) {
     if ( ( $x + $ball->width / 2 > $bat_x && $x < $bat_x + 108 )
         && $y > $screen_height - $bat->height + 5 )
     {
-        $ball_yv = -1000;
+        $ball_yv = -1120;
         $ball_xv
-            = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 4;
+            = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 8;
         $y -= $dy;
         play_bounce();
     } elsif ( $y > $screen_height ) {
@@ -350,6 +362,14 @@ while (1) {
     }
 
     $app->update(@updates);
+}
+
+sub put_sprite {
+    my ( $surface, $x, $y, $source, $source_rect ) = @_;
+
+    my $dest_rect = SDL::Rect->new( $x, $y, $source->width, $source->height );
+    $source->blit( $source_rect, $surface, $dest_rect );
+    return $dest_rect;
 }
 
 sub play_ping {
