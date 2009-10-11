@@ -248,7 +248,7 @@ while (1) {
             $x       = $bat_x + $bat->width / 3;
             $y       = $bat_y;
             $ball_xv = 300;
-            $ball_yv = -1000;
+            $ball_yv = -1120;
         }
         if ( $etype eq SDL_MOUSEMOTION ) {
 
