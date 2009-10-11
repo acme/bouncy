@@ -343,6 +343,7 @@ while (1) {
             push @updates, $brick_background_rect;
             $brick->visible(0);
             play_explosion();
+            play_ping();
             $score++;
             last;
         }
