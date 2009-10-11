@@ -319,13 +319,13 @@ while (1) {
         $ball_xv = $ball_xv * -1;
         $ball_yv = $ball_yv * 1;
         $x -= $dx;
-        play_ping();
+        play_ping( 255 - ( $x * 255 / $screen_width ) );
     }
     if ( $x < 0 ) {
         $ball_xv = $ball_xv * -1;
         $ball_yv = $ball_yv * 1;
         $x -= $dx;
-        play_ping();
+        play_ping( 255 - ( $x * 255 / $screen_width ) );
     }
 
     $ball_yv += $gravity * ( $last_frame_seconds + $last_frame_sleep );
@@ -339,18 +339,18 @@ while (1) {
         $ball_xv
             = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 8;
         $y -= $dy;
-        play_bounce();
+        play_bounce( 255 - ( $x * 255 / $screen_width ) );
     } elsif ( $y > $screen_height ) {
         $ball_yv = $ball_yv * -0.7;
         $ball_xv = $ball_xv * 0.7;
         $y -= $dy;
-        play_ping() if $dy > 0.2;
+        play_ping( 255 - ( $x * 255 / $screen_width ) ) if $dy > 0.2;
     }
     if ( $y - $ball->height < 0 ) {
         $ball_yv = $ball_yv * -1;
         $ball_xv = $ball_xv * 1;
         $y -= $dy;
-        play_ping();
+        play_ping( 255 - ( $x * 255 / $screen_width ) );
     }
 
     foreach my $brick (@bricks) {
@@ -379,10 +379,10 @@ while (1) {
                 push @updates, $brick_background_rect;
                 $brick->visible(0);
                 $score++;
-                play_explosion();
+                play_explosion( 255 - ( $brick->x * 255 / $screen_width ) );
             }
 
-            play_ping();
+            play_ping( 255 - ( $brick->x * 255 / $screen_width ) );
             last;
         }
     }
@@ -399,15 +399,21 @@ sub put_sprite {
 }
 
 sub play_ping {
-    $mixer->play_channel( -1, $ping, 0 );
+    my $left = shift;
+    my $channel = $mixer->play_channel( -1, $ping, 0 );
+    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
 }
 
 sub play_explosion {
-    $mixer->play_channel( -1, $explosion, 0 );
+    my $left = shift;
+    my $channel = $mixer->play_channel( -1, $explosion, 0 );
+    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
 }
 
 sub play_bounce {
-    $mixer->play_channel( -1, $bounce, 0 );
+    my $left = shift;
+    my $channel = $mixer->play_channel( -1, $bounce, 0 );
+    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
 }
 
 SDL::ShowCursor(1);
