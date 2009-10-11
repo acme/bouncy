@@ -26,8 +26,9 @@ my $app = SDL::App->new(
     #     -flags  => SDL_FULLSCREEN,
 );
 
-my $mixer     = SDL::Mixer->new( -frequency => 44100, -size => 4096 );
-my $ping      = SDL::Sound->new('ping.wav');
+my $mixer = SDL::Mixer->new( -frequency => 44100, -size => 4096 );
+my $ping = SDL::Sound->new('ping.wav');
+$ping->volume(64);
 my $explosion = SDL::Sound->new('explosion.wav');
 my $bounce    = SDL::Sound->new('bounce.wav');
 
@@ -45,7 +46,7 @@ my $font = SDL::Tool::Font->new(
 my $score = 0;
 
 my $ball = SDL::Surface->new( -name => 'ball2.png' );
-$ball->display_format_alpha();
+$ball->display_format();
 my $ball_rect = SDL::Rect->new( 0, 0, $ball->width, $ball->height );
 
 my $brick = SDL::Surface->new( -name => 'red.png' );
@@ -222,8 +223,6 @@ while (1) {
     # draw score
     my $score_rect = SDL::Rect->new( 0, 0, $screen_width, 20 );
     $background->blit( $score_rect, $app, $score_rect );
-
-    #$app->fill( $score_rect, $background_colour );
     $font->print( $app, 0, 0, "Score: $score" );
     push @updates, $score_rect;
 
