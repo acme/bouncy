@@ -101,8 +101,9 @@ sub put_sprite {
     return $dest_rect;
 }
 
-my $bat_x = 100;
+my $bat_x = $screen_width / 2;
 my $bat_y = $screen_height - $bat->height;
+$app->warp( $bat_x, $bat_y );
 my ( $x, $y ) = ( $bat_x + 54, $bat_y );
 
 my $ball_xv = 300;      # pixels per second
