@@ -29,9 +29,10 @@ my $app = SDL::App->new(
 my $mixer = SDL::Mixer->new( -frequency => 44100, -size => 1024 );
 my $ping = SDL::Sound->new('ping.ogg');
 $ping->volume(64);
-my $explosion = SDL::Sound->new('explosion.ogg');
-my $bounce    = SDL::Sound->new('bounce.ogg');
-my $music     = SDL::Music->new('Hydrate-Kenny_Beltrey.ogg');
+my $explosion          = SDL::Sound->new('explosion.ogg');
+my $explosion_multiple = SDL::Sound->new('explosion_multiple.ogg');
+my $bounce             = SDL::Sound->new('bounce.ogg');
+my $music              = SDL::Music->new('Hydrate-Kenny_Beltrey.ogg');
 $mixer->play_music( $music, -1 );
 
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
@@ -196,6 +197,8 @@ my $last_measured_fps_time   = time;
 my $last_measured_fps_frames = 0;
 my $frames                   = 0;
 
+my $bricks_since_bat = 0;
+
 while (1) {
     my $now = time;
 
@@ -245,10 +248,11 @@ while (1) {
         exit if ( $etype eq SDL_KEYDOWN );
 
         if ( $etype eq SDL_MOUSEBUTTONDOWN ) {
-            $x       = $bat_x + $bat->width / 3;
-            $y       = $bat_y;
-            $ball_xv = 300;
-            $ball_yv = -1120;
+            $x                = $bat_x + $bat->width / 3;
+            $y                = $bat_y;
+            $ball_xv          = 300;
+            $ball_yv          = -1120;
+            $bricks_since_bat = 0;
         }
         if ( $etype eq SDL_MOUSEMOTION ) {
 
@@ -340,6 +344,7 @@ while (1) {
             = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 8;
         $y -= $dy;
         play_bounce( 255 - ( $x * 255 / $screen_width ) );
+        $bricks_since_bat = 0;
     } elsif ( $y > $screen_height ) {
         $ball_yv = $ball_yv * -0.7;
         $ball_xv = $ball_xv * 0.7;
@@ -378,8 +383,15 @@ while (1) {
                 $foreground->blit( $app_rect, $app,        $app_rect );
                 push @updates, $brick_background_rect;
                 $brick->visible(0);
-                $score++;
-                play_explosion( 255 - ( $brick->x * 255 / $screen_width ) );
+                $bricks_since_bat++;
+                $score += $bricks_since_bat;
+                if ( $bricks_since_bat > 1 ) {
+                    play_explosion_multiple(
+                        255 - ( $brick->x * 255 / $screen_width ) );
+                } else {
+                    play_explosion(
+                        255 - ( $brick->x * 255 / $screen_width ) );
+                }
             }
 
             play_ping( 255 - ( $brick->x * 255 / $screen_width ) );
@@ -407,6 +419,12 @@ sub play_ping {
 sub play_explosion {
     my $left = shift;
     my $channel = $mixer->play_channel( -1, $explosion, 0 );
+    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+}
+
+sub play_explosion_multiple {
+    my $left = shift;
+    my $channel = $mixer->play_channel( -1, $explosion_multiple, 0 );
     $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
 }
 
