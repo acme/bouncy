@@ -123,7 +123,6 @@ foreach my $line ( split "\n", $map ) {
         }
         $brick_x += 64;
     }
-    print "\n";
     $brick_x = 0;
     $brick_y += 32;
 }
