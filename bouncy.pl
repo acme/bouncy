@@ -217,6 +217,7 @@ my $frames                   = 0;
 my $bricks_since_bat = 0;
 
 while (1) {
+    my @updates;
     my $now = time;
 
     #warn "frame";
@@ -228,7 +229,15 @@ while (1) {
         my $fps = ( $frames - $last_measured_fps_frames )
             / ( $now - $last_measured_fps_time );
 
-        # printf( "%0.2f FPS\n", $fps );
+        # draw fps
+        my $text = sprintf( "%0.1f FPS", $fps );
+        my $fps_width = $font->width($text);
+        my $fps_rect
+            = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 20 );
+        $foreground->blit( $fps_rect, $app, $fps_rect );
+        $font->print( $app, $screen_width - $fps_width, 0, $text );
+        push @updates, $fps_rect;
+
         $last_measured_fps_frames = $frames;
         $last_measured_fps_time   = $now;
     }
@@ -249,8 +258,6 @@ while (1) {
     }
 
     $frames++;
-
-    my @updates;
 
     # process event queue
     $event->pump;
@@ -393,8 +400,10 @@ while (1) {
             }
             $brick->strength( $brick->strength - 1 );
             if ( $brick->strength == 0 ) {
-                $background->blit( $brick->screen_rect, $foreground, $brick->screen_rect );
-                $foreground->blit( $brick->screen_rect, $app,        $brick->screen_rect );
+                $background->blit( $brick->screen_rect, $foreground,
+                    $brick->screen_rect );
+                $foreground->blit( $brick->screen_rect, $app,
+                    $brick->screen_rect );
                 push @updates, $brick->screen_rect;
                 $bricks->remove($brick);
                 $bricks_since_bat++;
@@ -407,8 +416,10 @@ while (1) {
                         255 - ( $brick->x * 255 / $screen_width ) );
                 }
             } else {
-                $brick_red_broken->blit( $brick->rect, $foreground, $brick->screen_rect );
-                $brick_red_broken->blit( $brick->rect, $app, $brick->screen_rect );
+                $brick_red_broken->blit( $brick->rect, $foreground,
+                    $brick->screen_rect );
+                $brick_red_broken->blit( $brick->rect, $app,
+                    $brick->screen_rect );
                 push @updates, $brick->screen_rect;
                 play_ping( 255 - ( $brick->x * 255 / $screen_width ) );
             }
