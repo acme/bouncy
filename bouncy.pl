@@ -202,6 +202,8 @@ foreach my $brick ( $bricks->members ) {
 
 $foreground->blit( $app_rect, $app, $app_rect );
 put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
+draw_score();
+
 $app->update($app_rect);
 
 SDL::ShowCursor(0);
@@ -314,13 +316,7 @@ while (1) {
         );
     }
 
-    # draw score
-    my $text        = "Score: $score";
-    my $score_width = $font->width($text);
-    my $score_rect  = SDL::Rect->new( 0, 0, $score_width, 20 );
-    $foreground->blit( $score_rect, $app, $score_rect );
-    $font->print( $app, 0, 0, $text );
-    push @updates, $score_rect;
+
 
     # draw the ball
     my $ball_foreground_rect
@@ -408,6 +404,7 @@ while (1) {
                 $bricks->remove($brick);
                 $bricks_since_bat++;
                 $score += $bricks_since_bat;
+                push @updates, draw_score();
                 if ( $bricks_since_bat > 1 ) {
                     play_explosion_multiple(
                         255 - ( $brick->x * 255 / $screen_width ) );
@@ -428,6 +425,17 @@ while (1) {
     }
 
     $app->update(@updates);
+}
+
+
+
+sub draw_score {
+    my $text        = "Score: $score";
+    my $score_width = $font->width($text);
+    my $score_rect  = SDL::Rect->new( 0, 0, $score_width, 20 );
+    $foreground->blit( $score_rect, $app, $score_rect );
+    $font->print( $app, 0, 0, $text );
+    return $score_rect;
 }
 
 sub put_sprite {
