@@ -160,7 +160,7 @@ $app->warp( $bat_x, $bat_y );
 my ( $x, $y ) = ( $bat_x + 54, $bat_y );
 
 my $ball_xv = 300;      # pixels per second
-my $ball_yv = -1120;    # pixels per second
+my $ball_yv = -1110;    # pixels per second
 my $gravity = 1250;     # pixels per second per second
 my @xs      = ($x);
 my @ys      = ($y);
@@ -277,7 +277,7 @@ while (1) {
             $x                = $bat_x + $bat->width / 3;
             $y                = $bat_y;
             $ball_xv          = 300;
-            $ball_yv          = -1120;
+            $ball_yv          = -1110;
             $bricks_since_bat = 0;
         }
         if ( $etype eq SDL_MOUSEMOTION ) {
@@ -357,7 +357,7 @@ while (1) {
     if ( ( $x + $ball->width / 2 > $bat_x && $x < $bat_x + 108 )
         && $y > $screen_height - $bat->height + 5 )
     {
-        $ball_yv = -1120;
+        $ball_yv = -1110;
         $ball_xv
             = 0.3 * $ball_xv + ( $x + $ball->width / 2 - $bat_x - 56 ) * 8;
         $y -= $dy;
