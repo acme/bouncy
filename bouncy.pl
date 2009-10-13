@@ -316,8 +316,6 @@ while (1) {
         );
     }
 
-
-
     # draw the ball
     my $ball_foreground_rect
         = SDL::Rect->new( $xs[-1], $ys[-1] - $ball->height,
@@ -379,13 +377,17 @@ while (1) {
     }
 
     foreach my $brick ( $bricks->members ) {
-        if (   $x > $brick->x - $ball->width
-            && $x < $brick->x + $brick->w
-            && $y > $brick->y
-            && $y < $brick->y + $brick->h + $ball->height )
+        my $brick_x = $brick->x;
+        my $brick_y = $brick->y;
+        my $brick_w = 64;
+        my $brick_h = 32;
+        if (   $x > $brick_x - $ball->width
+            && $x < $brick_x + $brick_w
+            && $y > $brick_y
+            && $y < $brick_y + $brick_h + $ball->height )
         {
-            if (   $ys[-1] > $brick->y
-                && $ys[-1] < $brick->y + $brick->h + $ball->height )
+            if (   $ys[-1] > $brick_y
+                && $ys[-1] < $brick_y + $brick_h + $ball->height )
             {
                 $ball_xv = $ball_xv * -1;
                 $x -= $dx;
@@ -407,10 +409,10 @@ while (1) {
                 push @updates, draw_score();
                 if ( $bricks_since_bat > 1 ) {
                     play_explosion_multiple(
-                        255 - ( $brick->x * 255 / $screen_width ) );
+                        255 - ( $brick_x * 255 / $screen_width ) );
                 } else {
                     play_explosion(
-                        255 - ( $brick->x * 255 / $screen_width ) );
+                        255 - ( $brick_x * 255 / $screen_width ) );
                 }
             } else {
                 $brick_red_broken->blit( $brick->rect, $foreground,
@@ -418,7 +420,7 @@ while (1) {
                 $brick_red_broken->blit( $brick->rect, $app,
                     $brick->screen_rect );
                 push @updates, $brick->screen_rect;
-                play_ping( 255 - ( $brick->x * 255 / $screen_width ) );
+                play_ping( 255 - ( $brick_x * 255 / $screen_width ) );
             }
             last;
         }
@@ -426,8 +428,6 @@ while (1) {
 
     $app->update(@updates);
 }
-
-
 
 sub draw_score {
     my $text        = "Score: $score";
