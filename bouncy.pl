@@ -15,6 +15,7 @@ use Time::HiRes qw(time sleep);
 
 my $screen_width  = 960;
 my $screen_height = 600;
+my $sound         = 1;
 
 my $max_fps                    = 300;
 my $min_seconds_between_frames = 1 / $max_fps;
@@ -26,14 +27,18 @@ my $app = SDL::App->new(
     #     -flags  => SDL_FULLSCREEN,
 );
 
-my $mixer = SDL::Mixer->new( -frequency => 44100, -size => 1024 );
-my $ping = SDL::Sound->new('ping.ogg');
-$ping->volume(64);
-my $explosion          = SDL::Sound->new('sound/explosion.ogg');
-my $explosion_multiple = SDL::Sound->new('sound/explosion_multiple.ogg');
-my $bounce             = SDL::Sound->new('bounce.ogg');
-my $music              = SDL::Music->new('Hydrate-Kenny_Beltrey.ogg');
-$mixer->play_music( $music, -1 );
+my ( $mixer, $ping, $explosion, $explosion_multiple, $bounce, $music );
+
+if ($sound) {
+    $mixer = SDL::Mixer->new( -frequency => 44100, -size => 1024 );
+    $ping = SDL::Sound->new('ping.ogg');
+    $ping->volume(64);
+    $explosion          = SDL::Sound->new('sound/explosion.ogg');
+    $explosion_multiple = SDL::Sound->new('sound/explosion_multiple.ogg');
+    $bounce             = SDL::Sound->new('bounce.ogg');
+    $music              = SDL::Music->new('Hydrate-Kenny_Beltrey.ogg');
+    $mixer->play_music( $music, -1 );
+}
 
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
@@ -373,6 +378,7 @@ while (1) {
                 $x -= $dx;
             } else {
                 $ball_yv = $ball_yv * -1;
+                $ball_xv *= 0.90;
                 $y -= $dy;
             }
             $brick->strength( $brick->strength - 1 );
@@ -419,26 +425,34 @@ sub put_sprite {
 
 sub play_ping {
     my $left = shift;
-    my $channel = $mixer->play_channel( -1, $ping, 0 );
-    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    if ($sound) {
+        my $channel = $mixer->play_channel( -1, $ping, 0 );
+        $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    }
 }
 
 sub play_explosion {
     my $left = shift;
-    my $channel = $mixer->play_channel( -1, $explosion, 0 );
-    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    if ($sound) {
+        my $channel = $mixer->play_channel( -1, $explosion, 0 );
+        $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    }
 }
 
 sub play_explosion_multiple {
     my $left = shift;
-    my $channel = $mixer->play_channel( -1, $explosion_multiple, 0 );
-    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    if ($sound) {
+        my $channel = $mixer->play_channel( -1, $explosion_multiple, 0 );
+        $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    }
 }
 
 sub play_bounce {
     my $left = shift;
-    my $channel = $mixer->play_channel( -1, $bounce, 0 );
-    $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    if ($sound) {
+        my $channel = $mixer->play_channel( -1, $bounce, 0 );
+        $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
+    }
 }
 
 SDL::ShowCursor(1);
