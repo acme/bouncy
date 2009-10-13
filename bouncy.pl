@@ -29,8 +29,8 @@ my $app = SDL::App->new(
 my $mixer = SDL::Mixer->new( -frequency => 44100, -size => 1024 );
 my $ping = SDL::Sound->new('ping.ogg');
 $ping->volume(64);
-my $explosion          = SDL::Sound->new('explosion.ogg');
-my $explosion_multiple = SDL::Sound->new('explosion_multiple.ogg');
+my $explosion          = SDL::Sound->new('sound/explosion.ogg');
+my $explosion_multiple = SDL::Sound->new('sound/explosion_multiple.ogg');
 my $bounce             = SDL::Sound->new('bounce.ogg');
 my $music              = SDL::Music->new('Hydrate-Kenny_Beltrey.ogg');
 $mixer->play_music( $music, -1 );
@@ -400,9 +400,8 @@ while (1) {
                 push @updates,
                     put_sprite( $app, $brick->x, $brick->y, $brick_red_broken,
                     $brick->rect );
+                play_ping( 255 - ( $brick->x * 255 / $screen_width ) );
             }
-
-            play_ping( 255 - ( $brick->x * 255 / $screen_width ) );
             last;
         }
     }
