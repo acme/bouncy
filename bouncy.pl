@@ -61,6 +61,8 @@ my $brick_rect = SDL::Rect->new( 0, 0, 64, 32 );
 Bouncy::Brick->rect($brick_rect);
 my $brick_red = SDL::Surface->new( -name => 'brick_red.png' );
 $brick_red->display_format();
+my $brick_red_broken = SDL::Surface->new( -name => 'brick_red_broken.png' );
+$brick_red_broken->display_format();
 my $brick_blue = SDL::Surface->new( -name => 'brick_blue.png' );
 $brick_blue->display_format();
 my $brick_purple = SDL::Surface->new( -name => 'brick_purple.png' );
@@ -391,6 +393,13 @@ while (1) {
                     play_explosion(
                         255 - ( $brick->x * 255 / $screen_width ) );
                 }
+            } else {
+                push @updates,
+                    put_sprite( $foreground, $brick->x, $brick->y,
+                    $brick_red_broken, $brick->rect );
+                push @updates,
+                    put_sprite( $app, $brick->x, $brick->y, $brick_red_broken,
+                    $brick->rect );
             }
 
             play_ping( 255 - ( $brick->x * 255 / $screen_width ) );
