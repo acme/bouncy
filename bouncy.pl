@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use lib 'lib';
+use Bouncy::Brick;
 use SDL;
 use SDL::App;
 use SDL::Color;
@@ -10,7 +11,7 @@ use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
 use SDL::TTFont;
-use Bouncy::Brick;
+use Set::Object;
 use Time::HiRes qw(time sleep);
 
 my $screen_width  = 960;
@@ -77,8 +78,8 @@ $brick_yellow->display_format();
 my $brick_green = SDL::Surface->new( -name => 'brick_green.png' );
 $brick_green->display_format();
 
-my @bricks;
-my $map = "
+my $bricks = Set::Object->new();
+my $map    = "
 
 
     RRRRRRR
@@ -92,41 +93,46 @@ $map =~ s/^\n//;
 foreach my $line ( split "\n", $map ) {
     foreach my $character ( split //, $line ) {
         if ( $character eq 'R' ) {
-            push @bricks,
+            $bricks->insert(
                 Bouncy::Brick->new(
-                x        => $brick_x,
-                y        => $brick_y,
-                surface  => $brick_red,
-                strength => 2,
-                );
+                    x        => $brick_x,
+                    y        => $brick_y,
+                    surface  => $brick_red,
+                    strength => 2,
+                )
+            );
         } elsif ( $character eq 'B' ) {
-            push @bricks,
+            $bricks->insert(
                 Bouncy::Brick->new(
-                x       => $brick_x,
-                y       => $brick_y,
-                surface => $brick_blue,
-                );
+                    x       => $brick_x,
+                    y       => $brick_y,
+                    surface => $brick_blue,
+                )
+            );
         } elsif ( $character eq 'P' ) {
-            push @bricks,
+            $bricks->insert(
                 Bouncy::Brick->new(
-                x       => $brick_x,
-                y       => $brick_y,
-                surface => $brick_purple,
-                );
+                    x       => $brick_x,
+                    y       => $brick_y,
+                    surface => $brick_purple,
+                )
+            );
         } elsif ( $character eq 'Y' ) {
-            push @bricks,
+            $bricks->insert(
                 Bouncy::Brick->new(
-                x       => $brick_x,
-                y       => $brick_y,
-                surface => $brick_yellow,
-                );
+                    x       => $brick_x,
+                    y       => $brick_y,
+                    surface => $brick_yellow,
+                )
+            );
         } elsif ( $character eq 'G' ) {
-            push @bricks,
+            $bricks->insert(
                 Bouncy::Brick->new(
-                x       => $brick_x,
-                y       => $brick_y,
-                surface => $brick_green,
-                );
+                    x       => $brick_x,
+                    y       => $brick_y,
+                    surface => $brick_green,
+                )
+            );
         }
         $brick_x += 64;
     }
@@ -184,7 +190,7 @@ my $foreground = SDL::Surface->new(
 $foreground->display_format();
 $background->blit( $app_rect, $foreground, $app_rect );
 
-foreach my $brick (@bricks) {
+foreach my $brick ( $bricks->members ) {
     put_sprite( $foreground, $brick->x, $brick->y, $brick->surface,
         $brick->rect );
 }
@@ -217,7 +223,7 @@ while (1) {
         my $fps = ( $frames - $last_measured_fps_frames )
             / ( $now - $last_measured_fps_time );
 
-        # printf( "%0.2f FPS\n", $fps );
+        printf( "%0.2f FPS\n", $fps );
         $last_measured_fps_frames = $frames;
         $last_measured_fps_time   = $now;
     }
@@ -364,8 +370,7 @@ while (1) {
         play_ping( 255 - ( $x * 255 / $screen_width ) );
     }
 
-    foreach my $brick (@bricks) {
-        next unless $brick->visible;
+    foreach my $brick ( $bricks->members ) {
         if (   $x > $brick->x - $ball->width
             && $x < $brick->x + $brick->w
             && $y > $brick->y
@@ -389,7 +394,7 @@ while (1) {
                 $background->blit( $app_rect, $foreground, $app_rect );
                 $foreground->blit( $app_rect, $app,        $app_rect );
                 push @updates, $brick_background_rect;
-                $brick->visible(0);
+                $bricks->remove($brick);
                 $bricks_since_bat++;
                 $score += $bricks_since_bat;
                 if ( $bricks_since_bat > 1 ) {
