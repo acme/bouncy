@@ -392,6 +392,7 @@ while (1) {
             } else {
                 $ball_yv = $ball_yv * -1;
                 $ball_xv *= 0.90;
+                $ball_yv *= 0.95;
                 $y -= $dy;
             }
             $brick->strength( $brick->strength - 1 );
