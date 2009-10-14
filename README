@@ -1,0 +1,12 @@
+Bouncy is me playing with SDL in Perl.
+
+I'm vaguely recreating my favourite game for the Spectrum:
+
+  http://en.wikipedia.org/wiki/Batty_%28video_game%29
+
+This is also a test of SDL and requires the Git redesign branch of the
+Perl SDL libraries:
+
+  http://github.com/kthakore/SDL_perl/tree/redesign
+  
+Leon
