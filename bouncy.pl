@@ -43,14 +43,12 @@ if ($sound) {
 
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
-my $background_colour = $SDL::Color::yellow;
-
 my $font = SDL::TTFont->new(
     -normal => 1,
     -name   => 'DroidSansMono.ttf',
     -size   => 20,
-    -fg     => $SDL::Color::black,
-    -bg     => SDL::Color->new( -r => 200, -g => 200, -b => 200 ),
+    -fg     => SDL::Color->new( 0, 0, 0 ),
+    -bg     => SDL::Color->new( 200, 200, 200 ),
 );
 my $score = 0;
 
@@ -185,7 +183,7 @@ while ( $tile_x < $screen_width ) {
 
 $background->fill(
     SDL::Rect->new( 0, 0, $screen_width, 24 ),
-    SDL::Color->new( -r => 200, -g => 200, -b => 200 )
+    SDL::Color->new( 200, 200, 200 )
 );
 
 my $foreground = SDL::Surface->new(
