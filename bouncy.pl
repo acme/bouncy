@@ -154,9 +154,11 @@ my $gravity = 1250;     # pixels per second per second
 my @xs      = ($x);
 my @ys      = ($y);
 
-my $background
-    = SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0,
-    0, 0, 0 )->display;
+my $background = SDL::DisplayFormat(
+    SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0, 0,
+        0, 0
+    )
+);
 
 my ( $tile_x, $tile_y ) = ( 0, 0 );
 while ( $tile_x < $screen_width ) {
@@ -174,9 +176,11 @@ my $grey_pixel = SDL::MapRGB( $background_pixel_format, 200, 200, 200 );
 SDL::FillRect( $background, SDL::Rect->new( 0, 0, $screen_width, 24 ),
     $grey_pixel );
 
-my $foreground
-    = SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0,
-    0, 0, 0 )->display;
+my $foreground = SDL::DisplayFormat(
+    SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0, 0,
+        0, 0
+    )
+);
 SDL::BlitSurface( $background, $app_rect, $foreground, $app_rect );
 
 foreach my $brick ( $bricks->members ) {
@@ -478,13 +482,13 @@ sub play_bounce {
 
 sub load_image {
     my $filename = shift;
-    my $image    = SDL::IMG_Load($filename)->display;
+    my $image    = SDL::DisplayFormat( SDL::IMG_Load($filename) );
     return $image;
 }
 
 sub load_image_alpha {
     my $filename = shift;
-    my $image    = SDL::IMG_Load($filename)->display_alpha;
+    my $image    = SDL::DisplayFormatAlpha( SDL::IMG_Load($filename) );
     return $image;
 }
 
