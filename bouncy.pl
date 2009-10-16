@@ -169,10 +169,10 @@ while ( $tile_x < $screen_width ) {
     $tile_x += $background_tile->w;
 }
 
-$background->fill_rect(
-    SDL::Rect->new( 0, 0, $screen_width, 24 ),
-    SDL::Color->new( 200, 200, 200 )
-);
+my $background_pixel_format = $background->format;
+my $grey_pixel = SDL::MapRGB( $background_pixel_format, 200, 200, 200 );
+SDL::FillRect( $background, SDL::Rect->new( 0, 0, $screen_width, 24 ),
+    $grey_pixel );
 
 my $foreground
     = SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0,
@@ -180,14 +180,15 @@ my $foreground
 SDL::BlitSurface( $background, $app_rect, $foreground, $app_rect );
 
 foreach my $brick ( $bricks->members ) {
-    SDL::BlitSurface( $brick->surface, $brick->rect, $foreground, $brick->screen_rect );
+    SDL::BlitSurface( $brick->surface, $brick->rect, $foreground,
+        $brick->screen_rect );
 }
 
 SDL::BlitSurface( $foreground, $app_rect, $app, $app_rect );
 put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 draw_score();
 
-SDL::Surface::update_rect( $app, 0, 0, $screen_width, $screen_height );
+SDL::UpdateRect( $app, 0, 0, $screen_width, $screen_height );
 
 #$app->update_rects($app_rect);
 
@@ -271,8 +272,10 @@ while (1) {
             # draw the bat
             my $bat_foreground_rect
                 = SDL::Rect->new( $bat_x, $bat_y, $bat->w, $bat->h );
-            SDL::BlitSurface( $foreground, $bat_foreground_rect, $app,
-                $bat_foreground_rect );
+            SDL::BlitSurface(
+                $foreground, $bat_foreground_rect,
+                $app,        $bat_foreground_rect
+            );
             push @updates, $bat_foreground_rect;
 
             $bat_x = $event->motion_x - 56;
@@ -305,7 +308,8 @@ while (1) {
     # draw the ball
     my $ball_foreground_rect
         = SDL::Rect->new( $xs[-1], $ys[-1] - $ball->h, $ball->w, $ball->h );
-    SDL::BlitSurface( $foreground, $ball_foreground_rect, $app, $ball_foreground_rect );
+    SDL::BlitSurface( $foreground, $ball_foreground_rect, $app,
+        $ball_foreground_rect );
     push @updates, $ball_foreground_rect;
 
     push @updates, put_sprite( $app, $x, $y - $ball->h, $ball, $ball_rect );
@@ -382,10 +386,14 @@ while (1) {
             }
             $brick->strength( $brick->strength - 1 );
             if ( $brick->strength == 0 ) {
-                SDL::BlitSurface( $background, $brick->screen_rect, $foreground,
-                    $brick->screen_rect );
-                SDL::BlitSurface( $foreground, $brick->screen_rect, $app,
-                    $brick->screen_rect );
+                SDL::BlitSurface(
+                    $background, $brick->screen_rect,
+                    $foreground, $brick->screen_rect
+                );
+                SDL::BlitSurface(
+                    $foreground, $brick->screen_rect,
+                    $app,        $brick->screen_rect
+                );
                 push @updates, $brick->screen_rect;
                 $bricks->remove($brick);
                 $bricks_since_bat++;
@@ -399,8 +407,10 @@ while (1) {
                         255 - ( $brick_x * 255 / $screen_width ) );
                 }
             } else {
-                SDL::BlitSurface( $brick_red_broken, $brick->rect, $foreground,
-                    $brick->screen_rect );
+                SDL::BlitSurface(
+                    $brick_red_broken, $brick->rect,
+                    $foreground,       $brick->screen_rect
+                );
                 SDL::BlitSurface( $brick_red_broken, $brick->rect, $app,
                     $brick->screen_rect );
                 push @updates, $brick->screen_rect;
@@ -410,7 +420,7 @@ while (1) {
         }
     }
 
-    SDL::Surface::update_rect( $app, 0, 0, 0, 0 );
+    SDL::UpdateRect( $app, 0, 0, 0, 0 );
 
     #    $app->update_rect(0, 0, $screen_width, $screen_height);
     #    $app->update_rects(@updates);
