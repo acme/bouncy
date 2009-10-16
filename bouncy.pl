@@ -177,13 +177,13 @@ $background->fill_rect(
 my $foreground
     = SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0,
     0, 0, 0 )->display;
-$background->blit( $app_rect, $foreground, $app_rect );
+SDL::BlitSurface( $background, $app_rect, $foreground, $app_rect );
 
 foreach my $brick ( $bricks->members ) {
-    $brick->surface->blit( $brick->rect, $foreground, $brick->screen_rect );
+    SDL::BlitSurface( $brick->surface, $brick->rect, $foreground, $brick->screen_rect );
 }
 
-$foreground->blit( $app_rect, $app, $app_rect );
+SDL::BlitSurface( $foreground, $app_rect, $app, $app_rect );
 put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 draw_score();
 
@@ -221,7 +221,7 @@ while (1) {
         my $fps_width = $font->width($text);
         my $fps_rect
             = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 20 );
-        $foreground->blit( $fps_rect, $app, $fps_rect );
+        SDL::BlitSurface( $foreground, $fps_rect, $app, $fps_rect );
 
         # $font->print( $app, $screen_width - $fps_width, 0, $text );
         push @updates, $fps_rect;
@@ -260,7 +260,7 @@ while (1) {
         exit if ( $etype eq SDL_KEYDOWN );
 
         if ( $etype eq SDL_MOUSEBUTTONDOWN ) {
-            $x                = $bat_x + $bat->width / 3;
+            $x                = $bat_x + $bat->w / 3;
             $y                = $bat_y;
             $ball_xv          = 300;
             $ball_yv          = -1110;
@@ -271,7 +271,7 @@ while (1) {
             # draw the bat
             my $bat_foreground_rect
                 = SDL::Rect->new( $bat_x, $bat_y, $bat->w, $bat->h );
-            $foreground->blit( $bat_foreground_rect, $app,
+            SDL::BlitSurface( $foreground, $bat_foreground_rect, $app,
                 $bat_foreground_rect );
             push @updates, $bat_foreground_rect;
 
@@ -305,7 +305,7 @@ while (1) {
     # draw the ball
     my $ball_foreground_rect
         = SDL::Rect->new( $xs[-1], $ys[-1] - $ball->h, $ball->w, $ball->h );
-    $foreground->blit( $ball_foreground_rect, $app, $ball_foreground_rect );
+    SDL::BlitSurface( $foreground, $ball_foreground_rect, $app, $ball_foreground_rect );
     push @updates, $ball_foreground_rect;
 
     push @updates, put_sprite( $app, $x, $y - $ball->h, $ball, $ball_rect );
@@ -382,9 +382,9 @@ while (1) {
             }
             $brick->strength( $brick->strength - 1 );
             if ( $brick->strength == 0 ) {
-                $background->blit( $brick->screen_rect, $foreground,
+                SDL::BlitSurface( $background, $brick->screen_rect, $foreground,
                     $brick->screen_rect );
-                $foreground->blit( $brick->screen_rect, $app,
+                SDL::BlitSurface( $foreground, $brick->screen_rect, $app,
                     $brick->screen_rect );
                 push @updates, $brick->screen_rect;
                 $bricks->remove($brick);
@@ -399,9 +399,9 @@ while (1) {
                         255 - ( $brick_x * 255 / $screen_width ) );
                 }
             } else {
-                $brick_red_broken->blit( $brick->rect, $foreground,
+                SDL::BlitSurface( $brick_red_broken, $brick->rect, $foreground,
                     $brick->screen_rect );
-                $brick_red_broken->blit( $brick->rect, $app,
+                SDL::BlitSurface( $brick_red_broken, $brick->rect, $app,
                     $brick->screen_rect );
                 push @updates, $brick->screen_rect;
                 play_ping( 255 - ( $brick_x * 255 / $screen_width ) );
@@ -420,7 +420,7 @@ sub draw_score {
     my $text        = "Score: $score";
     my $score_width = $font->width($text);
     my $score_rect  = SDL::Rect->new( 0, 0, $score_width, 20 );
-    $foreground->blit( $score_rect, $app, $score_rect );
+    SDL::BlitSurface( $foreground, $score_rect, $app, $score_rect );
 
     # $font->print( $app, 0, 0, $text );
     return $score_rect;
@@ -430,7 +430,7 @@ sub put_sprite {
     my ( $surface, $x, $y, $source, $source_rect ) = @_;
 
     my $dest_rect = SDL::Rect->new( $x, $y, $source->w, $source->h );
-    $source->blit( $source_rect, $surface, $dest_rect );
+    SDL::BlitSurface( $source, $source_rect, $surface, $dest_rect );
     return $dest_rect;
 }
 
