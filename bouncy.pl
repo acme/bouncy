@@ -424,10 +424,7 @@ while (1) {
         }
     }
 
-    SDL::UpdateRect( $app, 0, 0, 0, 0 );
-
-    #    $app->update_rect(0, 0, $screen_width, $screen_height);
-    #    $app->update_rects(@updates);
+    SDL::UpdateRects( $app, @updates );
 }
 
 sub draw_score {
