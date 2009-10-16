@@ -52,22 +52,22 @@ my $font = SDL::TTFont->new(
 );
 my $score = 0;
 
-my $background_tile = SDL::Surface->load('background_tile.png')->display;
+my $background_tile = load_image('background_tile.png');
 my $background_tile_rect
     = SDL::Rect->new( 0, 0, $background_tile->w, $background_tile->h );
 
-my $ball = SDL::Surface->load('ball2.png')->display;
+my $ball = load_image('ball2.png');
 my $ball_rect = SDL::Rect->new( 0, 0, $ball->w, $ball->h );
 
 my $brick_rect = SDL::Rect->new( 0, 0, 64, 32 );
 Bouncy::Brick->rect($brick_rect);
 
-my $brick_red        = SDL::Surface->load('brick_red.png')->display;
-my $brick_red_broken = SDL::Surface->load('brick_red_broken.png')->display;
-my $brick_blue       = SDL::Surface->load('brick_blue.png')->display;
-my $brick_purple     = SDL::Surface->load('brick_purple.png')->display;
-my $brick_yellow     = SDL::Surface->load('brick_yellow.png')->display;
-my $brick_green      = SDL::Surface->load('brick_green.png')->display;
+my $brick_red        = load_image('brick_red.png');
+my $brick_red_broken = load_image('brick_red_broken.png');
+my $brick_blue       = load_image('brick_blue.png');
+my $brick_purple     = load_image('brick_purple.png');
+my $brick_yellow     = load_image('brick_yellow.png');
+my $brick_green      = load_image('brick_green.png');
 
 my $bricks = Set::Object->new();
 my $map    = "
@@ -137,7 +137,7 @@ foreach my $line ( split "\n", $map ) {
     $brick_y += 32;
 }
 
-my $bat = SDL::Surface->load('bat.png')->display_alpha;
+my $bat = load_image_alpha('bat.png');
 
 my $bat_rect = SDL::Rect->new( 0, 0, $bat->w, $bat->h );
 
@@ -464,6 +464,18 @@ sub play_bounce {
         my $channel = $mixer->play_channel( -1, $bounce, 0 );
         $mixer->set_panning( $channel, 127 + $left / 2, 254 - $left / 2 );
     }
+}
+
+sub load_image {
+    my $filename = shift;
+    my $image    = SDL::IMG_Load($filename)->display;
+    return $image;
+}
+
+sub load_image_alpha {
+    my $filename = shift;
+    my $image    = SDL::IMG_Load($filename)->display_alpha;
+    return $image;
 }
 
 SDL::ShowCursor(1);
