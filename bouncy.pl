@@ -10,7 +10,7 @@ use SDL::Event;
 use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
-use SDL::TTFont;
+use SDL::TTF_Font;
 use Set::Object;
 use Time::HiRes qw(time sleep);
 
@@ -43,13 +43,8 @@ if ($sound) {
 
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
-my $font = SDL::TTFont->new(
-    -normal => 1,
-    -name   => 'DroidSansMono.ttf',
-    -size   => 20,
-    -fg     => SDL::Color->new( 0, 0, 0 ),
-    -bg     => SDL::Color->new( 200, 200, 200 ),
-);
+SDL::TTF_Init();
+my $ttf_font = SDL::TTF_OpenFont( 'DroidSansMono.ttf', 20 );
 my $score = 0;
 
 my $background_tile = load_image('background_tile.png');
@@ -223,12 +218,16 @@ while (1) {
 
         # draw fps
         my $text = sprintf( "%0.1f FPS", $fps );
-        my $fps_width = $font->width($text);
+        my ( $fps_width, $fps_height )
+            = @{ SDL::TTF_SizeText( $ttf_font, $text ) };
         my $fps_rect
             = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 20 );
         SDL::BlitSurface( $foreground, $fps_rect, $app, $fps_rect );
-
-        # $font->print( $app, $screen_width - $fps_width, 0, $text );
+        my $fps_surface = SDL::TTF_RenderText_Blended( $ttf_font, $text,
+            SDL::Color->new( 0, 0, 0 ) );
+        SDL::BlitSurface( $fps_surface,
+            SDL::Rect->new( 0, 0, $fps_surface->w, $fps_surface->h ),
+            $app, $fps_rect );
         push @updates, $fps_rect;
 
         $last_measured_fps_frames = $frames;
@@ -428,12 +427,16 @@ while (1) {
 }
 
 sub draw_score {
-    my $text        = "Score: $score";
-    my $score_width = $font->width($text);
-    my $score_rect  = SDL::Rect->new( 0, 0, $score_width, 20 );
+    my $text = "Score: $score";
+    my ( $score_width, $score_height )
+        = @{ SDL::TTF_SizeText( $ttf_font, $text ) };
+    my $score_rect = SDL::Rect->new( 0, 0, $score_width, 20 );
     SDL::BlitSurface( $foreground, $score_rect, $app, $score_rect );
-
-    # $font->print( $app, 0, 0, $text );
+    my $score_surface = SDL::TTF_RenderText_Blended( $ttf_font, $text,
+        SDL::Color->new( 0, 0, 0 ) );
+    SDL::BlitSurface( $score_surface,
+        SDL::Rect->new( 0, 0, $score_surface->w, $score_surface->h ),
+        $app, $score_rect );
     return $score_rect;
 }
 
