@@ -44,7 +44,7 @@ if ($sound) {
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
 SDL::TTF_Init();
-my $ttf_font = SDL::TTF_OpenFont( 'DroidSansMono.ttf', 20 );
+my $ttf_font = SDL::TTF_OpenFont( 'DroidSerif-Bold.ttf', 22 );
 my $score = 0;
 
 my $background_tile = load_image('background_tile.png');
@@ -185,11 +185,13 @@ foreach my $brick ( $bricks->members ) {
 
 SDL::BlitSurface( $foreground, $app_rect, $app, $app_rect );
 put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
+
+my $last_score_width = 0;
+my $last_fps_width   = 0;
+
 draw_score();
 
 SDL::UpdateRect( $app, 0, 0, $screen_width, $screen_height );
-
-#$app->update_rects($app_rect);
 
 SDL::ShowCursor(0);
 
@@ -220,15 +222,23 @@ while (1) {
         my $text = sprintf( "%0.1f FPS", $fps );
         my ( $fps_width, $fps_height )
             = @{ SDL::TTF_SizeText( $ttf_font, $text ) };
+        my $clear_rect = SDL::Rect->new( $screen_width - $last_fps_width,
+            0, $last_fps_width, 24 );
+        SDL::BlitSurface( $foreground, $clear_rect, $app, $clear_rect );
         my $fps_rect
-            = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 20 );
-        SDL::BlitSurface( $foreground, $fps_rect, $app, $fps_rect );
+            = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 24 );
         my $fps_surface = SDL::TTF_RenderText_Blended( $ttf_font, $text,
             SDL::Color->new( 0, 0, 0 ) );
         SDL::BlitSurface( $fps_surface,
             SDL::Rect->new( 0, 0, $fps_surface->w, $fps_surface->h ),
             $app, $fps_rect );
-        push @updates, $fps_rect;
+
+        if ( $fps_width > $last_fps_width ) {
+            push @updates, $fps_rect;
+        } else {
+            push @updates, $clear_rect;
+        }
+        $last_fps_width = $fps_width;
 
         $last_measured_fps_frames = $frames;
         $last_measured_fps_time   = $now;
@@ -430,14 +440,23 @@ sub draw_score {
     my $text = "Score: $score";
     my ( $score_width, $score_height )
         = @{ SDL::TTF_SizeText( $ttf_font, $text ) };
-    my $score_rect = SDL::Rect->new( 0, 0, $score_width, 20 );
-    SDL::BlitSurface( $foreground, $score_rect, $app, $score_rect );
+    my $clear_rect = SDL::Rect->new( 0, 0, $last_score_width, 24 );
+    SDL::BlitSurface( $foreground, $clear_rect, $app, $clear_rect );
+    my $score_rect = SDL::Rect->new( 0, 0, $score_width, 24 );
     my $score_surface = SDL::TTF_RenderText_Blended( $ttf_font, $text,
         SDL::Color->new( 0, 0, 0 ) );
     SDL::BlitSurface( $score_surface,
         SDL::Rect->new( 0, 0, $score_surface->w, $score_surface->h ),
         $app, $score_rect );
-    return $score_rect;
+    my $return;
+
+    if ( $score_width > $last_score_width ) {
+        $return = $score_rect;
+    } else {
+        $return = $clear_rect;
+    }
+    $last_score_width = $score_width;
+    return $return;
 }
 
 sub put_sprite {
