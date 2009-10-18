@@ -44,7 +44,7 @@ if ($sound) {
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
 SDL::TTF_Init();
-my $ttf_font = SDL::TTF_OpenFont( 'DroidSerif-Bold.ttf', 22 );
+my $ttf_font = SDL::TTF_OpenFont( 'DroidSans-Bold.ttf', 22 );
 my $score = 0;
 
 my $background_tile = load_image('background_tile.png');
