@@ -141,7 +141,7 @@ my $event = SDL::Event->new();
 my $bat_x = $screen_width / 2;
 my $bat_y = $screen_height - $bat->h;
 $app->warp( $bat_x, $bat_y );
-my ( $x, $y ) = ( $bat_x + 54, $bat_y );
+my ( $x, $y ) = ( $bat_x - $ball->w/2, $bat_y );
 
 my $ball_xv = 300;      # pixels per second
 my $ball_yv = -1110;    # pixels per second
