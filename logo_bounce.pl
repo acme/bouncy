@@ -1,6 +1,8 @@
 #!/usr/bin/env perl 
 use strict;
 use warnings;
+use lib 'lib';
+use Bouncy::FPS;
 use SDL;
 use SDL::App;
 use SDL::Color;
@@ -41,9 +43,12 @@ foreach my $i ( 0 .. 400 ) {
 
 my $event = SDL::Event->new();
 
+my $fps = Bouncy::FPS->new( max_fps => 300 );
+
 my $step   = 1;
 my $degree = 0;
 while (1) {
+    $fps->frame;
 
     # process event queue
     $event->pump;
@@ -73,5 +78,5 @@ while (1) {
         $x += $step;
     }
     SDL::UpdateRect( $app, 200, 150, $image->w, $image->h + 50 );
-    $degree++;
+    $degree += $fps->last_frame_seconds * 100;
 }
