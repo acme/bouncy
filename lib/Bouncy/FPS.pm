@@ -17,12 +17,27 @@ has 'last_frame_seconds' =>
     ( is => 'rw', isa => 'Num', required => 0, default => 0 );
 has 'last_frame_sleep' =>
     ( is => 'rw', isa => 'Num', required => 0, default => 0 );
+has 'last_measured_fps_time' =>
+    ( is => 'rw', isa => 'Num', required => 0, default => sub {time} );
+has 'last_measured_fps_frames' =>
+    ( is => 'rw', isa => 'Int', required => 0, default => 0 );
+has 'fps' => ( is => 'rw', isa => 'Num', required => 0, default => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
 sub frame {
     my $self = shift;
     my $time = time;
+
+    if ( $time - $self->last_measured_fps_time > 1 ) {
+        $self->fps( ( $self->last_measured_fps_frames + 1 )
+            / ( $time - $self->last_measured_fps_time ) );
+        $self->last_measured_fps_time($time);
+        $self->last_measured_fps_frames(0);
+    } else {
+        $self->last_measured_fps_frames(
+            $self->last_measured_fps_frames + 1 );
+    }
 
     my $last_frame_seconds = $time - $self->last_frame_time;
 
@@ -38,7 +53,6 @@ sub frame {
         $self->last_frame_time($time);
         $self->last_frame_seconds($last_frame_seconds);
     }
-
 }
 
 1;
