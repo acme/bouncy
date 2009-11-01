@@ -63,6 +63,9 @@ while (1) {
         exit if ( $etype eq SDL_KEYDOWN );
     }
 
+SDL::FillRect( $app, SDL::Rect->new( 200, 150, $image->w, $image->h+50 ),
+    $white_pixel );
+
     my $x = 0;
     while ( $x < $image->w ) {
 
