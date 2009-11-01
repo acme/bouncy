@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use lib 'lib';
 use Bouncy::Brick;
+use Bouncy::FPS;
 use SDL;
 use SDL::App;
 use SDL::Color;
@@ -18,8 +19,7 @@ my $screen_width  = 960;
 my $screen_height = 600;
 my $sound         = 0;
 
-my $max_fps                    = 300;
-my $min_seconds_between_frames = 1 / $max_fps;
+my $max_fps = 300;
 
 my $app = SDL::App->new(
     -width  => $screen_width,
@@ -141,7 +141,7 @@ my $event = SDL::Event->new();
 my $bat_x = $screen_width / 2;
 my $bat_y = $screen_height - $bat->h;
 $app->warp( $bat_x, $bat_y );
-my ( $x, $y ) = ( $bat_x - $ball->w/2, $bat_y );
+my ( $x, $y ) = ( $bat_x - $ball->w / 2, $bat_y );
 
 my $ball_xv = 300;      # pixels per second
 my $ball_yv = -1110;    # pixels per second
@@ -188,6 +188,7 @@ put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 
 my $last_score_width = 0;
 my $last_fps_width   = 0;
+my $last_fps_text    = "";
 
 draw_score();
 
@@ -195,39 +196,26 @@ SDL::UpdateRect( $app, 0, 0, $screen_width, $screen_height );
 
 SDL::ShowCursor(0);
 
-my $this_frame_time  = time;
-my $last_frame_time  = $this_frame_time;
-my $last_frame_sleep = 0;
-
-my $last_measured_fps_time   = time;
-my $last_measured_fps_frames = 0;
-my $frames                   = 0;
-
 my $bricks_since_bat = 0;
+
+my $fps = Bouncy::FPS->new( max_fps => $max_fps );
 
 while (1) {
     my @updates;
-    my $now = time;
 
-    #warn "frame";
-    $last_frame_time = $this_frame_time;
-    $this_frame_time = $now;
-    my $last_frame_seconds = $this_frame_time - $last_frame_time;
+    $fps->frame;
 
-    if ( $now - $last_measured_fps_time > 1 ) {
-        my $fps = ( $frames - $last_measured_fps_frames )
-            / ( $now - $last_measured_fps_time );
-
-        # draw fps
-        my $text = sprintf( "%0.1f FPS", $fps );
+    # draw fps
+    my $fps_text = sprintf( "%0.1f FPS", $fps->fps );
+    if ( $fps_text ne $last_fps_text ) {
         my ( $fps_width, $fps_height )
-            = @{ SDL::TTF_SizeText( $ttf_font, $text ) };
+            = @{ SDL::TTF_SizeText( $ttf_font, $fps_text ) };
         my $clear_rect = SDL::Rect->new( $screen_width - $last_fps_width,
             0, $last_fps_width, 24 );
         SDL::BlitSurface( $foreground, $clear_rect, $app, $clear_rect );
         my $fps_rect
             = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 24 );
-        my $fps_surface = SDL::TTF_RenderText_Blended( $ttf_font, $text,
+        my $fps_surface = SDL::TTF_RenderText_Blended( $ttf_font, $fps_text,
             SDL::Color->new( 0, 0, 0 ) );
         SDL::BlitSurface( $fps_surface,
             SDL::Rect->new( 0, 0, $fps_surface->w, $fps_surface->h ),
@@ -239,27 +227,8 @@ while (1) {
             push @updates, $clear_rect;
         }
         $last_fps_width = $fps_width;
-
-        $last_measured_fps_frames = $frames;
-        $last_measured_fps_time   = $now;
+        $last_fps_text  = $fps_text;
     }
-
-    #warn $last_frame_seconds, ' <?' , $min_seconds_between_frames;
-    if ( $last_frame_seconds < $min_seconds_between_frames ) {
-
-        #warn "sleep";
-        my $seconds_to_sleep
-            = $min_seconds_between_frames - $last_frame_seconds;
-        my $actually_slept = sleep($seconds_to_sleep);
-        $last_frame_sleep = $actually_slept;
-
-        #warn "  slept for $seconds_to_sleep = $last_frame_sleep";
-        $this_frame_time = time + $seconds_to_sleep - $actually_slept;
-    } else {
-        $last_frame_sleep = 0;
-    }
-
-    $frames++;
 
     # process event queue
     $event->pump;
@@ -335,7 +304,7 @@ while (1) {
         shift @ys;
     }
 
-    my $dx = $ball_xv * ( $last_frame_seconds + $last_frame_sleep );
+    my $dx = $ball_xv * ( $fps->last_frame_seconds );
 
     $x += $dx;
     if ( $x + $ball->w > $screen_width ) {
@@ -351,8 +320,8 @@ while (1) {
         play_ping( 255 - ( $x * 255 / $screen_width ) );
     }
 
-    $ball_yv += $gravity * ( $last_frame_seconds + $last_frame_sleep );
-    my $dy = $ball_yv * ( $last_frame_seconds + $last_frame_sleep );
+    $ball_yv += $gravity * ( $fps->last_frame_seconds );
+    my $dy = $ball_yv * ( $fps->last_frame_seconds );
     $y += $dy;
 
     if ( ( $x + $ball->w / 2 > $bat_x && $x < $bat_x + 108 )
