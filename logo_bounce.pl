@@ -48,10 +48,6 @@ my $degree = 0;
 while (1) {
     $fps->frame;
 
-    # process event queue
-    $event->pump;
-
-    # handle user events
     $event->pump;
     while ( $event->poll() ) {
         my $etype = $event->type;
@@ -66,7 +62,6 @@ while (1) {
 
     my $x = 0;
     while ( $x < $image->w ) {
-
         SDL::BlitSurface(
             $image,
             SDL::Rect->new( $x, 0, $step, $image->h ),
