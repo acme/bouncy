@@ -34,6 +34,11 @@ SDL::FillRect( $app, SDL::Rect->new( 0, 0, $screen_width, $screen_height ),
 
 SDL::UpdateRect( $app, 0, 0, $app->w, $app->h );
 
+my @y_offsets;
+foreach my $i ( 0 .. 400 ) {
+    push @y_offsets, 200 - sin( $i * 3.141596 / 400 ) * 50;
+}
+
 my $event = SDL::Event->new();
 
 my $step   = 1;
@@ -55,15 +60,13 @@ while (1) {
 
     my $x = 0;
     while ( $x < $image->w ) {
-        my $y_angle = $degree / 30 + $x / 200;
-        $y_angle -= 3.141519 * int( $y_angle / 3.141519 );
 
         SDL::BlitSurface(
             $image,
             SDL::Rect->new( $x, 0, $step, $image->h ),
             $app,
             SDL::Rect->new(
-                200 + $x, -sin($y_angle) * 50 + 200,
+                200 + $x, $y_offsets[ ( $degree * 4 + $x / 2 ) % 400 ],
                 $step, $image->h
             )
         );
@@ -72,5 +75,3 @@ while (1) {
     SDL::UpdateRect( $app, 200, 150, $image->w, $image->h + 50 );
     $degree++;
 }
-
-sleep 1;
