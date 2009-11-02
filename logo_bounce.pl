@@ -11,6 +11,7 @@ use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
 use SDL::TTF_Font;
+use SDL::Video;
 
 my $screen_width  = 960;
 my $screen_height = 600;
@@ -25,14 +26,14 @@ my $app = SDL::App->new(
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
 my $app_pixel_format = $app->format;
-my $white_pixel = SDL::MapRGB( $app_pixel_format, 255, 255, 255 );
+my $white_pixel = SDL::Video::map_RGB( $app_pixel_format, 255, 255, 255 );
 
-my $image = SDL::DisplayFormat( SDL::IMG_Load('logo.png') );
+my $image = SDL::Video::display_format( SDL::IMG_Load('logo.png') );
 
 SDL::FillRect( $app, SDL::Rect->new( 0, 0, $screen_width, $screen_height ),
     $white_pixel );
 
-SDL::UpdateRect( $app, 0, 0, $app->w, $app->h );
+SDL::Video::update_rect( $app, 0, 0, $app->w, $app->h );
 
 my @y_offsets;
 foreach my $i ( 0 .. 400 ) {
@@ -73,6 +74,6 @@ while (1) {
         );
         $x += $step;
     }
-    SDL::UpdateRect( $app, 200, 150, $image->w, $image->h + 50 );
+    SDL::Video::update_rect( $app, 200, 150, $image->w, $image->h + 50 );
     $degree += $fps->last_frame_seconds * 100;
 }
