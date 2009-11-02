@@ -178,14 +178,14 @@ my $foreground = SDL::Video::display_format(
         0, 0
     )
 );
-SDL::BlitSurface( $background, $app_rect, $foreground, $app_rect );
+SDL::Video::blit_surface( $background, $app_rect, $foreground, $app_rect );
 
 foreach my $brick ( $bricks->members ) {
-    SDL::BlitSurface( $brick->surface, $brick->rect, $foreground,
+    SDL::Video::blit_surface( $brick->surface, $brick->rect, $foreground,
         $brick->screen_rect );
 }
 
-SDL::BlitSurface( $foreground, $app_rect, $app, $app_rect );
+SDL::Video::blit_surface( $foreground, $app_rect, $app, $app_rect );
 put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 
 my $last_score_width = 0;
@@ -214,12 +214,12 @@ while (1) {
             = @{ SDL::TTF_SizeText( $ttf_font, $fps_text ) };
         my $clear_rect = SDL::Rect->new( $screen_width - $last_fps_width,
             0, $last_fps_width, 24 );
-        SDL::BlitSurface( $foreground, $clear_rect, $app, $clear_rect );
+        SDL::Video::blit_surface( $foreground, $clear_rect, $app, $clear_rect );
         my $fps_rect
             = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 24 );
         my $fps_surface = SDL::TTF_RenderText_Blended( $ttf_font, $fps_text,
             SDL::Color->new( 0, 0, 0 ) );
-        SDL::BlitSurface( $fps_surface,
+        SDL::Video::blit_surface( $fps_surface,
             SDL::Rect->new( 0, 0, $fps_surface->w, $fps_surface->h ),
             $app, $fps_rect );
 
@@ -256,7 +256,7 @@ while (1) {
             # draw the bat
             my $bat_foreground_rect
                 = SDL::Rect->new( $bat_x, $bat_y, $bat->w, $bat->h );
-            SDL::BlitSurface(
+            SDL::Video::blit_surface(
                 $foreground, $bat_foreground_rect,
                 $app,        $bat_foreground_rect
             );
@@ -292,7 +292,7 @@ while (1) {
     # draw the ball
     my $ball_foreground_rect
         = SDL::Rect->new( $xs[-1], $ys[-1] - $ball->h, $ball->w, $ball->h );
-    SDL::BlitSurface( $foreground, $ball_foreground_rect, $app,
+    SDL::Video::blit_surface( $foreground, $ball_foreground_rect, $app,
         $ball_foreground_rect );
     push @updates, $ball_foreground_rect;
 
@@ -370,11 +370,11 @@ while (1) {
             }
             $brick->strength( $brick->strength - 1 );
             if ( $brick->strength == 0 ) {
-                SDL::BlitSurface(
+                SDL::Video::blit_surface(
                     $background, $brick->screen_rect,
                     $foreground, $brick->screen_rect
                 );
-                SDL::BlitSurface(
+                SDL::Video::blit_surface(
                     $foreground, $brick->screen_rect,
                     $app,        $brick->screen_rect
                 );
@@ -391,11 +391,11 @@ while (1) {
                         255 - ( $brick_x * 255 / $screen_width ) );
                 }
             } else {
-                SDL::BlitSurface(
+                SDL::Video::blit_surface(
                     $brick_red_broken, $brick->rect,
                     $foreground,       $brick->screen_rect
                 );
-                SDL::BlitSurface( $brick_red_broken, $brick->rect, $app,
+                SDL::Video::blit_surface( $brick_red_broken, $brick->rect, $app,
                     $brick->screen_rect );
                 push @updates, $brick->screen_rect;
                 play_ping( 255 - ( $brick_x * 255 / $screen_width ) );
@@ -412,11 +412,11 @@ sub draw_score {
     my ( $score_width, $score_height )
         = @{ SDL::TTF_SizeText( $ttf_font, $text ) };
     my $clear_rect = SDL::Rect->new( 0, 0, $last_score_width, 24 );
-    SDL::BlitSurface( $foreground, $clear_rect, $app, $clear_rect );
+    SDL::Video::blit_surface( $foreground, $clear_rect, $app, $clear_rect );
     my $score_rect = SDL::Rect->new( 0, 0, $score_width, 24 );
     my $score_surface = SDL::TTF_RenderText_Blended( $ttf_font, $text,
         SDL::Color->new( 0, 0, 0 ) );
-    SDL::BlitSurface( $score_surface,
+    SDL::Video::blit_surface( $score_surface,
         SDL::Rect->new( 0, 0, $score_surface->w, $score_surface->h ),
         $app, $score_rect );
     my $return;
@@ -434,7 +434,7 @@ sub put_sprite {
     my ( $surface, $x, $y, $source, $source_rect ) = @_;
 
     my $dest_rect = SDL::Rect->new( $x, $y, $source->w, $source->h );
-    SDL::BlitSurface( $source, $source_rect, $surface, $dest_rect );
+    SDL::Video::blit_surface( $source, $source_rect, $surface, $dest_rect );
     return $dest_rect;
 }
 

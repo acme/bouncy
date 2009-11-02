@@ -63,7 +63,7 @@ while (1) {
 
     my $x = 0;
     while ( $x < $image->w ) {
-        SDL::BlitSurface(
+        SDL::Video::blit_surface(
             $image,
             SDL::Rect->new( $x, 0, $step, $image->h ),
             $app,
