@@ -12,6 +12,7 @@ use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
 use SDL::TTF_Font;
+use SDL::Video;
 use Set::Object;
 use Time::HiRes qw(time sleep);
 
@@ -149,7 +150,7 @@ my $gravity = 1250;     # pixels per second per second
 my @xs      = ($x);
 my @ys      = ($y);
 
-my $background = SDL::DisplayFormat(
+my $background = SDL::Video::display_format(
     SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0, 0,
         0, 0
     )
@@ -167,11 +168,12 @@ while ( $tile_x < $screen_width ) {
 }
 
 my $background_pixel_format = $background->format;
-my $grey_pixel = SDL::MapRGB( $background_pixel_format, 200, 200, 200 );
+my $grey_pixel
+    = SDL::Video::map_RGB( $background_pixel_format, 200, 200, 200 );
 SDL::FillRect( $background, SDL::Rect->new( 0, 0, $screen_width, 24 ),
     $grey_pixel );
 
-my $foreground = SDL::DisplayFormat(
+my $foreground = SDL::Video::display_format(
     SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0, 0,
         0, 0
     )
@@ -192,7 +194,7 @@ my $last_fps_text    = "";
 
 draw_score();
 
-SDL::UpdateRect( $app, 0, 0, $screen_width, $screen_height );
+SDL::Video::update_rect( $app, 0, 0, $screen_width, $screen_height );
 
 SDL::ShowCursor(0);
 
@@ -402,7 +404,7 @@ while (1) {
         }
     }
 
-    SDL::UpdateRects( $app, @updates );
+    SDL::Video::update_rects( $app, @updates );
 }
 
 sub draw_score {
@@ -470,13 +472,13 @@ sub play_bounce {
 
 sub load_image {
     my $filename = shift;
-    my $image    = SDL::DisplayFormat( SDL::IMG_Load($filename) );
+    my $image    = SDL::Video::display_format( SDL::IMG_Load($filename) );
     return $image;
 }
 
 sub load_image_alpha {
     my $filename = shift;
-    my $image    = SDL::DisplayFormatAlpha( SDL::IMG_Load($filename) );
+    my $image = SDL::Video::display_format_alpha( SDL::IMG_Load($filename) );
     return $image;
 }
 
