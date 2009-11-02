@@ -170,7 +170,7 @@ while ( $tile_x < $screen_width ) {
 my $background_pixel_format = $background->format;
 my $grey_pixel
     = SDL::Video::map_RGB( $background_pixel_format, 200, 200, 200 );
-SDL::FillRect( $background, SDL::Rect->new( 0, 0, $screen_width, 24 ),
+SDL::Video::fill_rect( $background, SDL::Rect->new( 0, 0, $screen_width, 24 ),
     $grey_pixel );
 
 my $foreground = SDL::Video::display_format(

@@ -30,7 +30,7 @@ my $white_pixel = SDL::Video::map_RGB( $app_pixel_format, 255, 255, 255 );
 
 my $image = SDL::Video::display_format( SDL::IMG_Load('logo.png') );
 
-SDL::FillRect( $app, SDL::Rect->new( 0, 0, $screen_width, $screen_height ),
+SDL::Video::fill_rect( $app, SDL::Rect->new( 0, 0, $screen_width, $screen_height ),
     $white_pixel );
 
 SDL::Video::update_rect( $app, 0, 0, $app->w, $app->h );
@@ -58,7 +58,7 @@ while (1) {
         exit if ( $etype eq SDL_KEYDOWN );
     }
 
-    SDL::FillRect( $app,
+    SDL::Video::fill_rect( $app,
         SDL::Rect->new( 200, 150, $image->w, $image->h + 50 ), $white_pixel );
 
     my $x = 0;
