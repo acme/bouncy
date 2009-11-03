@@ -18,7 +18,7 @@ use Time::HiRes qw(time sleep);
 
 my $screen_width  = 960;
 my $screen_height = 600;
-my $sound         = 0;
+my $sound         = 1;
 
 my $max_fps = 300;
 
