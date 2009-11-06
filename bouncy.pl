@@ -52,7 +52,7 @@ my $background_tile = load_image('background_tile.png');
 my $background_tile_rect
     = SDL::Rect->new( 0, 0, $background_tile->w, $background_tile->h );
 
-my $ball = load_image('ball2.png');
+my $ball = load_image_alpha('ball2.png');
 my $ball_rect = SDL::Rect->new( 0, 0, $ball->w, $ball->h );
 
 my $brick_rect = SDL::Rect->new( 0, 0, 64, 32 );
