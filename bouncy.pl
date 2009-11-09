@@ -49,8 +49,10 @@ if ($sound) {
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
 SDL::TTF_Init();
-my $ttf_font = SDL::TTF_OpenFont( 'DroidSans-Bold.ttf', 22 );
-my $score = 0;
+my $ttf_font     = SDL::TTF_OpenFont( 'DroidSans-Bold.ttf', 22 );
+my $score        = 0;
+my $points       = 0;
+my $points_added = time;
 
 my $background_tile = load_image('background_tile.png');
 my $background_tile_rect
@@ -193,6 +195,7 @@ SDL::Video::blit_surface( $foreground, $app_rect, $app, $app_rect );
 put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 
 my $last_score_width = 0;
+my $last_score_text  = "";
 my $last_fps_width   = 0;
 my $last_fps_text    = "";
 
@@ -380,8 +383,10 @@ while (1) {
                 push @updates, $brick->screen_rect;
                 $bricks->remove($brick);
                 $bricks_since_bat++;
-                $score += $bricks_since_bat;
+                $points += $bricks_since_bat;
+                $points_added = time;
                 push @updates, draw_score();
+
                 if ( $bricks_since_bat > 1 ) {
                     play_explosion_multiple(
                         255 - ( $brick_x * 255 / $screen_width ) );
@@ -402,18 +407,28 @@ while (1) {
             last;
         }
     }
-
+    push @updates, draw_score();
     SDL::Video::update_rects( $app, @updates );
 }
 
 sub draw_score {
-    my $text = "Score: $score";
+    if ( $points && ( time - $points_added ) > 2 ) {
+        $score += $points;
+        $points = 0;
+    }
+    my $score_text;
+    if ($points) {
+        $score_text = "Score: $score +$points";
+    } else {
+        $score_text = "Score: $score";
+    }
+    return if $score_text eq $last_score_text;
     my ( $score_width, $score_height )
-        = @{ SDL::TTF_SizeText( $ttf_font, $text ) };
+        = @{ SDL::TTF_SizeText( $ttf_font, $score_text ) };
     my $clear_rect = SDL::Rect->new( 0, 0, $last_score_width, 24 );
     SDL::Video::blit_surface( $foreground, $clear_rect, $app, $clear_rect );
     my $score_rect = SDL::Rect->new( 0, 0, $score_width, 24 );
-    my $score_surface = SDL::TTF_RenderText_Blended( $ttf_font, $text,
+    my $score_surface = SDL::TTF_RenderText_Blended( $ttf_font, $score_text,
         SDL::Color->new( 0, 0, 0 ) );
     SDL::Video::blit_surface( $score_surface,
         SDL::Rect->new( 0, 0, $score_surface->w, $score_surface->h ),
@@ -425,6 +440,7 @@ sub draw_score {
     } else {
         $return = $clear_rect;
     }
+    $last_score_text  = $score_text;
     $last_score_width = $score_width;
     return $return;
 }
