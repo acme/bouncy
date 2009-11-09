@@ -8,9 +8,11 @@ use SDL;
 use SDL::App;
 use SDL::Color;
 use SDL::Event;
-use SDL::MixChunk;
-use SDL::MixMusic;
+use SDL::Events;
+use SDL::Mixer::MixChunk;
+use SDL::Mixer::MixMusic;
 use SDL::Mixer;
+use SDL::MouseMotionEvent;
 use SDL::Rect;
 use SDL::Surface;
 use SDL::TTF_Font;
@@ -235,26 +237,20 @@ while (1) {
         $last_fps_text  = $fps_text;
     }
 
-    # process event queue
-    $event->pump;
+    # process events
+    while (1) {
+        SDL::Events::pump_events();
+        last unless SDL::Events::poll_event($event);
 
-    # handle user events
-    my $event = SDL::Event->new;
-    while ( $event->poll() ) {
-        my $etype = $event->type;
-
-        exit if ( $etype eq SDL_QUIT );
-        exit if ( SDL::GetKeyState(SDLK_ESCAPE) );
-        exit if ( $etype eq SDL_KEYDOWN );
-
-        if ( $etype eq SDL_MOUSEBUTTONDOWN ) {
+        if ( $event->type == SDL_KEYDOWN ) {
+            exit;
+        } elsif ( $event->type == SDL_MOUSEBUTTONDOWN ) {
             $x                = $bat_x + $bat->w / 3;
             $y                = $bat_y;
             $ball_xv          = 300;
             $ball_yv          = -1110;
             $bricks_since_bat = 0;
-        }
-        if ( $etype eq SDL_MOUSEMOTION ) {
+        } elsif ( $event->type == SDL_MOUSEMOTION ) {
 
             # draw the bat
             my $bat_foreground_rect
@@ -265,7 +261,7 @@ while (1) {
             );
             push @updates, $bat_foreground_rect;
 
-            $bat_x = $event->motion_x - 56;
+            $bat_x = $event->motion->x - 56;
             $bat_x = 0 if $bat_x < 0;
             $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
             push @updates,

@@ -7,6 +7,7 @@ use SDL;
 use SDL::App;
 use SDL::Color;
 use SDL::Event;
+use SDL::Events;
 use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
@@ -30,8 +31,8 @@ my $white_pixel = SDL::Video::map_RGB( $app_pixel_format, 255, 255, 255 );
 
 my $image = SDL::Video::display_format( SDL::IMG_Load('logo.png') );
 
-SDL::Video::fill_rect( $app, SDL::Rect->new( 0, 0, $screen_width, $screen_height ),
-    $white_pixel );
+SDL::Video::fill_rect( $app,
+    SDL::Rect->new( 0, 0, $screen_width, $screen_height ), $white_pixel );
 
 SDL::Video::update_rect( $app, 0, 0, $app->w, $app->h );
 
@@ -49,13 +50,13 @@ my $degree = 0;
 while (1) {
     $fps->frame;
 
-    $event->pump;
-    while ( $event->poll() ) {
-        my $etype = $event->type;
+    while (1) {
+        SDL::Events::pump_events();
+        last unless SDL::Events::poll_event($event);
 
-        exit if ( $etype eq SDL_QUIT );
-        exit if ( SDL::GetKeyState(SDLK_ESCAPE) );
-        exit if ( $etype eq SDL_KEYDOWN );
+        if ( $event->type == SDL_KEYDOWN ) {
+            exit;
+        }
     }
 
     SDL::Video::fill_rect( $app,
