@@ -4,6 +4,9 @@ use warnings;
 use lib 'lib';
 use Bouncy::Brick;
 use Bouncy::FPS;
+use Bouncy::Sprite;
+use Bouncy::Sprite::FPS;
+use Bouncy::Sprite::Score;
 use SDL;
 use SDL::App;
 use SDL::Color;
@@ -194,12 +197,24 @@ foreach my $brick ( $bricks->members ) {
 SDL::Video::blit_surface( $foreground, $app_rect, $app, $app_rect );
 put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
 
-my $last_score_width = 0;
-my $last_score_text  = "";
-my $last_fps_width   = 0;
-my $last_fps_text    = "";
-
-draw_score();
+my $sprite_fps = Bouncy::Sprite::FPS->new(
+    foreground => $app,
+    background => $foreground,
+    text       => '? FPS',
+    font       => $ttf_font,
+    x          => $screen_width,
+    y          => 0,
+);
+$sprite_fps->draw;
+my $sprite_score = Bouncy::Sprite::Score->new(
+    foreground => $app,
+    background => $foreground,
+    text       => 'Score: 0',
+    font       => $ttf_font,
+    x          => 0,
+    y          => 0,
+);
+$sprite_score->draw;
 
 SDL::Video::update_rect( $app, 0, 0, $screen_width, $screen_height );
 
@@ -211,34 +226,10 @@ my $fps = Bouncy::FPS->new( max_fps => $max_fps );
 
 while (1) {
     my @updates;
-
     $fps->frame;
 
-    # draw fps
-    my $fps_text = sprintf( "%0.1f FPS", $fps->fps );
-    if ( $fps_text ne $last_fps_text ) {
-        my ( $fps_width, $fps_height )
-            = @{ SDL::TTF_SizeText( $ttf_font, $fps_text ) };
-        my $clear_rect = SDL::Rect->new( $screen_width - $last_fps_width,
-            0, $last_fps_width, 24 );
-        SDL::Video::blit_surface( $foreground, $clear_rect, $app,
-            $clear_rect );
-        my $fps_rect
-            = SDL::Rect->new( $screen_width - $fps_width, 0, $fps_width, 24 );
-        my $fps_surface = SDL::TTF_RenderText_Blended( $ttf_font, $fps_text,
-            SDL::Color->new( 0, 0, 0 ) );
-        SDL::Video::blit_surface( $fps_surface,
-            SDL::Rect->new( 0, 0, $fps_surface->w, $fps_surface->h ),
-            $app, $fps_rect );
-
-        if ( $fps_width > $last_fps_width ) {
-            push @updates, $fps_rect;
-        } else {
-            push @updates, $clear_rect;
-        }
-        $last_fps_width = $fps_width;
-        $last_fps_text  = $fps_text;
-    }
+    $sprite_fps->text( sprintf( "%0.1f FPS", $fps->fps ) );
+    push @updates, $sprite_fps->draw;
 
     # process events
     while (1) {
@@ -422,27 +413,9 @@ sub draw_score {
     } else {
         $score_text = "Score: $score";
     }
-    return if $score_text eq $last_score_text;
-    my ( $score_width, $score_height )
-        = @{ SDL::TTF_SizeText( $ttf_font, $score_text ) };
-    my $clear_rect = SDL::Rect->new( 0, 0, $last_score_width, 24 );
-    SDL::Video::blit_surface( $foreground, $clear_rect, $app, $clear_rect );
-    my $score_rect = SDL::Rect->new( 0, 0, $score_width, 24 );
-    my $score_surface = SDL::TTF_RenderText_Blended( $ttf_font, $score_text,
-        SDL::Color->new( 0, 0, 0 ) );
-    SDL::Video::blit_surface( $score_surface,
-        SDL::Rect->new( 0, 0, $score_surface->w, $score_surface->h ),
-        $app, $score_rect );
-    my $return;
 
-    if ( $score_width > $last_score_width ) {
-        $return = $score_rect;
-    } else {
-        $return = $clear_rect;
-    }
-    $last_score_text  = $score_text;
-    $last_score_width = $score_width;
-    return $return;
+    $sprite_score->text($score_text);
+    return $sprite_score->draw;
 }
 
 sub put_sprite {
