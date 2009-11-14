@@ -5,6 +5,8 @@ use lib 'lib';
 use Bouncy::Brick;
 use Bouncy::FPS;
 use Bouncy::Sprite;
+use Bouncy::Sprite::Ball;
+use Bouncy::Sprite::Bat;
 use Bouncy::Sprite::FPS;
 use Bouncy::Sprite::Score;
 use SDL;
@@ -142,22 +144,11 @@ foreach my $line ( split "\n", $map ) {
     $brick_y += 32;
 }
 
-my $bat = load_image_alpha('bat.png');
-
-my $bat_rect = SDL::Rect->new( 0, 0, $bat->w, $bat->h );
-
 my $event = SDL::Event->new();
-
-my $bat_x = $screen_width / 2;
-my $bat_y = $screen_height - $bat->h;
-$app->warp( $bat_x, $bat_y );
-my ( $x, $y ) = ( $bat_x - $ball->w / 2, $bat_y );
 
 my $ball_xv = 300;      # pixels per second
 my $ball_yv = -1110;    # pixels per second
 my $gravity = 1250;     # pixels per second per second
-my @xs      = ($x);
-my @ys      = ($y);
 
 my $background = SDL::Video::display_format(
     SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0, 0,
@@ -195,7 +186,34 @@ foreach my $brick ( $bricks->members ) {
 }
 
 SDL::Video::blit_surface( $foreground, $app_rect, $app, $app_rect );
-put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
+
+my $sprite_ball = Bouncy::Sprite::Ball->new(
+    foreground => $app,
+    background => $foreground,
+    surface    => load_image_alpha('ball2.png'),
+    x          => 0,
+    y          => 0,
+);
+
+my $sprite_bat = Bouncy::Sprite::Bat->new(
+    foreground => $app,
+    background => $foreground,
+    surface    => load_image_alpha('bat.png'),
+    x          => 0,
+    y          => 0,
+);
+
+my $bat_x = $screen_width / 2;
+my $bat_y = $screen_height - $sprite_bat->surface->h;
+$app->warp( $bat_x, $bat_y );
+my ( $x, $y ) = ( $bat_x - $ball->w / 2, $bat_y );
+my $old_y = $y;
+$sprite_ball->x($x);
+$sprite_ball->y($y);
+$sprite_ball->draw;
+$sprite_bat->x($bat_x);
+$sprite_bat->y($bat_y);
+$sprite_bat->draw;
 
 my $sprite_fps = Bouncy::Sprite::FPS->new(
     foreground => $app,
@@ -239,7 +257,7 @@ while (1) {
         if ( $event->type == SDL_KEYDOWN ) {
             exit;
         } elsif ( $event->type == SDL_MOUSEBUTTONDOWN ) {
-            $x                = $bat_x + $bat->w / 3;
+            $x                = $bat_x + $sprite_bat->surface->w / 3;
             $y                = $bat_y;
             $ball_xv          = 300;
             $ball_yv          = -1110;
@@ -247,57 +265,31 @@ while (1) {
         } elsif ( $event->type == SDL_MOUSEMOTION ) {
 
             # draw the bat
-            my $bat_foreground_rect
-                = SDL::Rect->new( $bat_x, $bat_y, $bat->w, $bat->h );
-            SDL::Video::blit_surface(
-                $foreground, $bat_foreground_rect,
-                $app,        $bat_foreground_rect
-            );
-            push @updates, $bat_foreground_rect;
+
+            #my $bat_foreground_rect
+            #    = SDL::Rect->new( $bat_x, $bat_y, $bat->w, $bat->h );
+            #SDL::Video::blit_surface(
+            #    $foreground, $bat_foreground_rect,
+            #    $app,        $bat_foreground_rect
+            #);
+            #push @updates, $bat_foreground_rect;
 
             $bat_x = $event->motion->x - 56;
             $bat_x = 0 if $bat_x < 0;
             $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
-            push @updates,
-                put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
+
+            #push @updates,
+            #    put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
+            $sprite_bat->x($bat_x);
+            $sprite_bat->y($bat_y);
+            push @updates, $sprite_bat->draw;
         }
     }
 
-    # draw tail
-    if (0) {
-        SDL::GFXAalineRGBA(
-            $$app, $x,
-            $y - $ball->height / 2,
-            $xs[0] + $ball->width / 2,
-            $ys[0] - $ball->height / 2,
-            0, 127, 127, 255
-        );
-        SDL::GFXAalineRGBA(
-            $$app,
-            $x + $ball->width,
-            $y - $ball->height / 2,
-            $xs[0] + $ball->width / 2,
-            $ys[0] - $ball->height / 2,
-            0, 127, 127, 255
-        );
-    }
-
     # draw the ball
-    my $ball_foreground_rect
-        = SDL::Rect->new( $xs[-1], $ys[-1] - $ball->h, $ball->w, $ball->h );
-    SDL::Video::blit_surface( $foreground, $ball_foreground_rect, $app,
-        $ball_foreground_rect );
-    push @updates, $ball_foreground_rect;
-
-    push @updates, put_sprite( $app, $x, $y - $ball->h, $ball, $ball_rect );
-
-    push @xs, $x;
-    push @ys, $y;
-
-    if ( @xs > 80 ) {
-        shift @xs;
-        shift @ys;
-    }
+    $sprite_ball->x($x);
+    $sprite_ball->y( $y - 28 );
+    push @updates, $sprite_ball->draw;
 
     my $dx = $ball_xv * ( $fps->last_frame_seconds );
 
@@ -320,7 +312,7 @@ while (1) {
     $y += $dy;
 
     if ( ( $x + $ball->w / 2 > $bat_x && $x < $bat_x + 108 )
-        && $y > $screen_height - $bat->h + 5 )
+        && $y > $screen_height - $sprite_bat->surface->h + 5 )
     {
         $ball_yv = -1110;
         $ball_xv = 0.3 * $ball_xv + ( $x + $ball->w / 2 - $bat_x - 56 ) * 8;
@@ -350,8 +342,8 @@ while (1) {
             && $y > $brick_y
             && $y < $brick_y + $brick_h + $ball->h )
         {
-            if (   $ys[-1] > $brick_y
-                && $ys[-1] < $brick_y + $brick_h + $ball->h )
+            if (   $old_y > $brick_y
+                && $old_y < $brick_y + $brick_h + $ball->h )
             {
                 $ball_xv = $ball_xv * -1;
                 $x -= $dx;
@@ -398,6 +390,7 @@ while (1) {
             last;
         }
     }
+    $old_y = $y;
     push @updates, draw_score();
     SDL::Video::update_rects( $app, @updates );
 }
