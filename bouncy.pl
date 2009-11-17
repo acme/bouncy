@@ -168,11 +168,12 @@ while ( $tile_x < $screen_width ) {
     $tile_x += $background_tile->w;
 }
 
-my $background_pixel_format = $background->format;
-my $grey_pixel
-    = SDL::Video::map_RGB( $background_pixel_format, 200, 200, 200 );
-SDL::Video::fill_rect( $background, SDL::Rect->new( 0, 0, $screen_width, 24 ),
-    $grey_pixel );
+my $background_top = load_image('background_top.png');
+my $background_top_rect = SDL::Rect->new( 0, 0, 960, 24 );
+SDL::Video::blit_surface(
+    $background_top, $background_top_rect,
+    $background,     $background_top_rect
+);
 
 my $foreground = SDL::Video::display_format(
     SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0, 0,
