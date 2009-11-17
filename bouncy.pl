@@ -263,6 +263,8 @@ while (1) {
             $ball_xv          = 300;
             $ball_yv          = -1110;
             $bricks_since_bat = 0;
+            $score += $points;
+            $points = 0;
         } elsif ( $event->type == SDL_MOUSEMOTION ) {
 
             # draw the bat
@@ -320,6 +322,8 @@ while (1) {
         $y -= $dy;
         play_bounce( 255 - ( $x * 255 / $screen_width ) );
         $bricks_since_bat = 0;
+        $score += $points;
+        $points = 0;
     } elsif ( $y > $screen_height ) {
         $ball_yv = $ball_yv * -0.7;
         $ball_xv = $ball_xv * 0.7;
@@ -399,7 +403,8 @@ while (1) {
 sub draw_score {
     if ( $points && ( time - $points_added ) > 2 ) {
         $score += $points;
-        $points = 0;
+        $points           = 0;
+        $bricks_since_bat = 0;
     }
     my $score_text;
     if ($points) {
