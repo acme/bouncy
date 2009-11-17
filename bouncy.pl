@@ -17,6 +17,7 @@ use SDL::Events;
 use SDL::Mixer::MixChunk;
 use SDL::Mixer::MixMusic;
 use SDL::Mixer;
+use SDL::Mouse;
 use SDL::MouseMotionEvent;
 use SDL::Rect;
 use SDL::Surface;
@@ -205,7 +206,7 @@ my $sprite_bat = Bouncy::Sprite::Bat->new(
 
 my $bat_x = $screen_width / 2;
 my $bat_y = $screen_height - $sprite_bat->surface->h;
-$app->warp( $bat_x, $bat_y );
+SDL::Mouse::warp_mouse( $bat_x, $bat_y );
 my ( $x, $y ) = ( $bat_x - $ball->w / 2, $bat_y );
 my $old_y = $y;
 $sprite_ball->x($x);
@@ -236,7 +237,7 @@ $sprite_score->draw;
 
 SDL::Video::update_rect( $app, 0, 0, $screen_width, $screen_height );
 
-SDL::ShowCursor(0);
+SDL::Mouse::show_cursor(0);
 
 my $bricks_since_bat = 0;
 
