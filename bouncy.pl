@@ -14,6 +14,8 @@ use SDL::App;
 use SDL::Color;
 use SDL::Event;
 use SDL::Events;
+use SDL::KeyboardEvent;
+use SDL::Image;
 use SDL::Mixer::MixChunk;
 use SDL::Mixer::MixMusic;
 use SDL::Mixer;
@@ -151,6 +153,9 @@ my $ball_xv = 300;      # pixels per second
 my $ball_yv = -1110;    # pixels per second
 my $gravity = 1250;     # pixels per second per second
 
+my $bat_xv = 0;         # pixels per second
+my $bat_xa = 0;         # pixels per second per second
+
 my $background = SDL::Video::display_format(
     SDL::Surface->new( SDL_SWSURFACE, $screen_width, $screen_height, 8, 0, 0,
         0, 0
@@ -244,6 +249,9 @@ my $bricks_since_bat = 0;
 
 my $fps = Bouncy::FPS->new( max_fps => $max_fps );
 
+my $key_left  = 0;
+my $key_right = 0;
+
 while (1) {
     my @updates;
     $fps->frame;
@@ -257,7 +265,16 @@ while (1) {
         last unless SDL::Events::poll_event($event);
 
         if ( $event->type == SDL_KEYDOWN ) {
-            exit;
+            my $key = $event->key_sym;
+            exit if $key == SDLK_ESCAPE;
+            $key_left  = 1 if $key == SDLK_LEFT;
+            $key_right = 1 if $key == SDLK_RIGHT;
+
+        } elsif ( $event->type == SDL_KEYUP ) {
+            my $key = $event->key_sym;
+            $key_left  = 0 if $key == SDLK_LEFT;
+            $key_right = 0 if $key == SDLK_RIGHT;
+
         } elsif ( $event->type == SDL_MOUSEBUTTONDOWN ) {
             $x                = $bat_x + $sprite_bat->surface->w / 3;
             $y                = $bat_y;
@@ -268,27 +285,32 @@ while (1) {
             $points = 0;
         } elsif ( $event->type == SDL_MOUSEMOTION ) {
 
-            # draw the bat
-
-            #my $bat_foreground_rect
-            #    = SDL::Rect->new( $bat_x, $bat_y, $bat->w, $bat->h );
-            #SDL::Video::blit_surface(
-            #    $foreground, $bat_foreground_rect,
-            #    $app,        $bat_foreground_rect
-            #);
-            #push @updates, $bat_foreground_rect;
-
             $bat_x = $event->motion->x - 56;
             $bat_x = 0 if $bat_x < 0;
             $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
 
-            #push @updates,
-            #    put_sprite( $app, $bat_x, $bat_y, $bat, $bat_rect );
             $sprite_bat->x($bat_x);
             $sprite_bat->y($bat_y);
             push @updates, $sprite_bat->draw;
         }
     }
+
+    $bat_xa = 0;
+    $bat_xa -= 2000 if $key_left;
+    $bat_xa += 2000 if $key_right;
+
+    unless ( $key_left || $key_right ) {
+        $bat_xa = -2000 if $bat_xv > 0;
+        $bat_xa = 2000  if $bat_xv < 0;
+    }
+
+    $bat_xv += $bat_xa * $fps->last_frame_seconds;
+    $bat_xv = 600  if $bat_xv > 600;
+    $bat_xv = -600 if $bat_xv < -600;
+    $bat_x += $bat_xv * $fps->last_frame_seconds;
+    $sprite_bat->x($bat_x);
+    $sprite_bat->y($bat_y);
+    push @updates, $sprite_bat->draw;
 
     # draw the ball
     $sprite_ball->x($x);
@@ -460,13 +482,14 @@ sub play_bounce {
 
 sub load_image {
     my $filename = shift;
-    my $image    = SDL::Video::display_format( SDL::IMG_Load($filename) );
+    my $image    = SDL::Video::display_format( SDL::Image::load($filename) );
     return $image;
 }
 
 sub load_image_alpha {
     my $filename = shift;
-    my $image = SDL::Video::display_format_alpha( SDL::IMG_Load($filename) );
+    my $image
+        = SDL::Video::display_format_alpha( SDL::Image::load($filename) );
     return $image;
 }
 
