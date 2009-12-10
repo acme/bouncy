@@ -8,6 +8,7 @@ use SDL::App;
 use SDL::Color;
 use SDL::Event;
 use SDL::Events;
+use SDL::Image;
 use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
@@ -29,7 +30,7 @@ my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 my $app_pixel_format = $app->format;
 my $white_pixel = SDL::Video::map_RGB( $app_pixel_format, 255, 255, 255 );
 
-my $image = SDL::Video::display_format( SDL::IMG_Load('logo.png') );
+my $image = SDL::Video::display_format( SDL::Image::load('logo.png') );
 
 SDL::Video::fill_rect( $app,
     SDL::Rect->new( 0, 0, $screen_width, $screen_height ), $white_pixel );
