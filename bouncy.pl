@@ -14,13 +14,11 @@ use SDL::App;
 use SDL::Color;
 use SDL::Event;
 use SDL::Events;
-use SDL::KeyboardEvent;
 use SDL::Image;
 use SDL::Mixer::MixChunk;
 use SDL::Mixer::MixMusic;
 use SDL::Mixer;
 use SDL::Mouse;
-use SDL::MouseMotionEvent;
 use SDL::Rect;
 use SDL::Surface;
 use SDL::TTF_Font;
@@ -285,7 +283,7 @@ while (1) {
             $points = 0;
         } elsif ( $event->type == SDL_MOUSEMOTION ) {
 
-            $bat_x = $event->motion->x - 56;
+            $bat_x = $event->motion_x - 56;
             $bat_x = 0 if $bat_x < 0;
             $bat_x = $screen_width - 112 if $bat_x + 112 > $screen_width;
 
