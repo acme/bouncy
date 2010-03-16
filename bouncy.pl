@@ -15,13 +15,18 @@ use SDL::Color;
 use SDL::Event;
 use SDL::Events;
 use SDL::Image;
+use SDL::Mixer::Channels;
+use SDL::Mixer::Effects;
 use SDL::Mixer::MixChunk;
 use SDL::Mixer::MixMusic;
+use SDL::Mixer::Music;
+use SDL::Mixer::Samples;
 use SDL::Mixer;
 use SDL::Mouse;
 use SDL::Rect;
 use SDL::Surface;
-use SDL::TTF_Font;
+use SDL::TTF;
+use SDL::TTF::Font;
 use SDL::Video;
 use Set::Object;
 use Time::HiRes qw(time sleep);
@@ -42,20 +47,21 @@ my $app = SDL::App->new(
 my ( $ping, $explosion, $explosion_multiple, $bounce, $music );
 
 if ($sound) {
-    SDL::MixOpenAudio( 44100, SDL::Constants::AUDIO_S16, 2, 4096 );
-    $ping = SDL::MixLoadWAV('ping.ogg');
+    SDL::Mixer::open_audio( 44100, SDL::Constants::AUDIO_S16, 2, 4096 );
+    $ping = SDL::Mixer::Samples::load_WAV('ping.ogg');
     $ping->volume(64);
-    $explosion          = SDL::MixLoadWAV('sound/explosion.ogg');
-    $explosion_multiple = SDL::MixLoadWAV('sound/explosion_multiple.ogg');
-    $bounce             = SDL::MixLoadWAV('bounce.ogg');
-    my $mix_music = SDL::MixLoadMUS('Hydrate-Kenny_Beltrey.ogg');
-    SDL::MixPlayMusic( $mix_music, -1 );
+    $explosion = SDL::Mixer::Samples::load_WAV('sound/explosion.ogg');
+    $explosion_multiple
+        = SDL::Mixer::Samples::load_WAV('sound/explosion_multiple.ogg');
+    $bounce = SDL::Mixer::Samples::load_WAV('bounce.ogg');
+    my $mix_music = SDL::Mixer::Music::load_MUS('Hydrate-Kenny_Beltrey.ogg');
+    SDL::Mixer::Music::play_music( $mix_music, -1 );
 }
 
 my $app_rect = SDL::Rect->new( 0, 0, $screen_width, $screen_height );
 
-SDL::TTF_Init();
-my $ttf_font     = SDL::TTF_OpenFont( 'DroidSans-Bold.ttf', 22 );
+SDL::TTF::init();
+my $ttf_font     = SDL::TTF::open_font( 'DroidSans-Bold.ttf', 22 );
 my $score        = 0;
 my $points       = 0;
 my $points_added = time;
@@ -449,32 +455,50 @@ sub put_sprite {
 sub play_ping {
     my $left = shift;
     if ($sound) {
-        my $channel = SDL::MixPlayChannel( -1, $ping, 0 );
-        SDL::MixSetPanning( $channel, 127 + $left / 2, 254 - $left / 2 );
+        my $channel = SDL::Mixer::Channels::play_channel( -1, $ping, 0 );
+        SDL::Mixer::Effects::set_panning(
+            $channel,
+            127 + $left / 2,
+            254 - $left / 2
+        );
     }
 }
 
 sub play_explosion {
     my $left = shift;
     if ($sound) {
-        my $channel = SDL::MixPlayChannel( -1, $explosion, 0 );
-        SDL::MixSetPanning( $channel, 127 + $left / 2, 254 - $left / 2 );
+        my $channel = SDL::Mixer::Channels::play_channel( -1, $explosion, 0 );
+        SDL::Mixer::Effects::set_panning(
+            $channel,
+            127 + $left / 2,
+            254 - $left / 2
+        );
     }
 }
 
 sub play_explosion_multiple {
     my $left = shift;
     if ($sound) {
-        my $channel = SDL::MixPlayChannel( -1, $explosion_multiple, 0 );
-        SDL::MixSetPanning( $channel, 127 + $left / 2, 254 - $left / 2 );
+        my $channel
+            = SDL::Mixer::Channels::play_channel( -1, $explosion_multiple,
+            0 );
+        SDL::Mixer::Effects::set_panning(
+            $channel,
+            127 + $left / 2,
+            254 - $left / 2
+        );
     }
 }
 
 sub play_bounce {
     my $left = shift;
     if ($sound) {
-        my $channel = SDL::MixPlayChannel( -1, $bounce, 0 );
-        SDL::MixSetPanning( $channel, 127 + $left / 2, 254 - $left / 2 );
+        my $channel = SDL::Mixer::Channels::play_channel( -1, $bounce, 0 );
+        SDL::Mixer::Effects::set_panning(
+            $channel,
+            127 + $left / 2,
+            254 - $left / 2
+        );
     }
 }
 

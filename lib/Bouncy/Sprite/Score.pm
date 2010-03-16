@@ -35,9 +35,9 @@ sub draw {
         push @updates, $last_rect;
     }
 
-    my ( $fps_width, $fps_height ) = @{ SDL::TTF_SizeText( $font, $text ) };
+    my ( $fps_width, $fps_height ) = @{ SDL::TTF::size_text( $font, $text ) };
     my $rect = SDL::Rect->new( 0, $y, $fps_width, $fps_height );
-    my $surface = SDL::TTF_RenderText_Blended( $font, $text,
+    my $surface = SDL::TTF::render_text_blended( $font, $text,
         SDL::Color->new( 0, 0, 0 ) );
     SDL::Video::blit_surface( $surface,
         SDL::Rect->new( 0, 0, $surface->w, $surface->h ),
