@@ -10,7 +10,7 @@ use Bouncy::Sprite::Bat;
 use Bouncy::Sprite::FPS;
 use Bouncy::Sprite::Score;
 use SDL;
-use SDL::App;
+use SDLx::App;
 use SDL::Color;
 use SDL::Event;
 use SDL::Events;
@@ -37,9 +37,9 @@ my $sound         = 1;
 
 my $max_fps = 300;
 
-my $app = SDL::App->new(
-    -width  => $screen_width,
-    -height => $screen_height,
+my $app = SDLx::App->new(
+    width  => $screen_width,
+    height => $screen_height,
 
     #     -flags  => SDL_FULLSCREEN,
 );

@@ -3,10 +3,10 @@ use Moose;
 use MooseX::StrictConstructor;
 extends 'Bouncy::Sprite';
 
-has 'font' => ( is => 'ro', isa => 'SDL::TTF_Font', required => 1 );
-has 'text' => ( is => 'rw', isa => 'Str',           required => 1 );
-has 'x'    => ( is => 'ro', isa => 'Int',           required => 1 );
-has 'y'    => ( is => 'ro', isa => 'Int',           required => 1 );
+has 'font' => ( is => 'ro', isa => 'SDL::TTF::Font', required => 1 );
+has 'text' => ( is => 'rw', isa => 'Str',            required => 1 );
+has 'x'    => ( is => 'ro', isa => 'Int',            required => 1 );
+has 'y'    => ( is => 'ro', isa => 'Int',            required => 1 );
 
 has 'last_text' => ( is => 'rw', isa => 'Str', default => '' );
 has 'last_rect' => ( is => 'rw', isa => 'SDL::Rect' );

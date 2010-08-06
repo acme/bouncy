@@ -4,7 +4,7 @@ use warnings;
 use lib 'lib';
 use Bouncy::FPS;
 use SDL;
-use SDL::App;
+use SDLx::App;
 use SDL::Color;
 use SDL::Event;
 use SDL::Events;
@@ -12,15 +12,15 @@ use SDL::Image;
 use SDL::Mixer;
 use SDL::Rect;
 use SDL::Surface;
-use SDL::TTF_Font;
+use SDL::TTF::Font;
 use SDL::Video;
 
 my $screen_width  = 960;
 my $screen_height = 600;
 
-my $app = SDL::App->new(
-    -width  => $screen_width,
-    -height => $screen_height,
+my $app = SDLx::App->new(
+    width  => $screen_width,
+    height => $screen_height,
 
     # -flags  => SDL_FULLSCREEN,
 );
